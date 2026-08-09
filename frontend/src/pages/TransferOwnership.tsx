@@ -97,7 +97,7 @@ const TransferOwnership = () => {
       const updated = {
         ...rc,
         previousOwners: prev,
-        ownersCount: (typeof rc.ownersCount === "number" && rc.ownersCount > 0 ? rc.ownersCount : (1 + prev.length)) + 1,
+        ownersCount: 1 + prev.length,
         owner: {
           name: newOwner.name.trim(),
           email: newOwner.email?.trim() || rc.owner?.email,
