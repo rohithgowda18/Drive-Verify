@@ -1,127 +1,170 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, CheckCircle2, AlertTriangle, Search, BarChart3 } from "lucide-react";
+import { Shield, CheckCircle2, AlertTriangle, Search, BarChart3, Users, HelpCircle, ArrowRight, Server, Database, Code, ShieldCheck } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <div className="min-h-screen bg-gradient-hero text-foreground">
       {/* Header */}
-      <header className="border-b bg-card/50 backdrop-blur-sm">
+      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <Shield className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">RC Verification</span>
+            <Shield className="h-6 w-6 text-primary animate-pulse" />
+            <span className="text-xl font-bold tracking-tight">Drive Verify</span>
           </div>
           <Button onClick={() => navigate("/dashboard")}>
-            Get Started
+            Get Started <ArrowRight className="h-4 w-4 ml-1.5" />
           </Button>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20">
+      <section className="container mx-auto px-4 py-24">
         <div className="max-w-4xl mx-auto text-center space-y-6">
           <div className="inline-block">
-            <div className="bg-primary rounded-full p-4 mb-6">
-              <Shield className="h-16 w-16 text-primary-foreground" />
+            <div className="bg-primary/10 border border-primary/20 rounded-full px-4 py-1 text-sm text-primary font-semibold mb-6 flex items-center gap-1.5">
+              <ShieldCheck className="h-4 w-4" /> Next-Gen Vehicle Registry
             </div>
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold leading-tight">
-            Smart RC Verification &<br />
-            <span className="text-primary">Fraud Detection System</span>
+          <h1 className="text-5xl md:text-6xl font-bold leading-tight tracking-tight">
+            Drive Verify &<br />
+            <span className="text-primary bg-clip-text">Fraud Detection System</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Instantly verify vehicle Registration Certificates, detect fraud patterns, and ensure authenticity with our intelligent verification system.
+            Instantly verify vehicle Registration Certificates, track chronological ownership transfers, and identify risk metrics seamlessly.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Button size="lg" className="text-lg" onClick={() => navigate("/dashboard")}>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
+            <Button size="lg" className="text-lg px-8" onClick={() => navigate("/dashboard")}>
               <Shield className="mr-2 h-5 w-5" />
-              Start Verification
+              Go to Dashboard
             </Button>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          <div className="bg-card p-6 rounded-lg shadow-card border border-border">
-            <div className="bg-success/10 rounded-full p-3 w-fit mb-4">
-              <CheckCircle2 className="h-8 w-8 text-success" />
-            </div>
-            <h3 className="text-xl font-bold mb-2">Instant Verification</h3>
-            <p className="text-muted-foreground">
-              Scan QR codes on RC cards and verify authenticity in under 1 second. Real-time validation against secure database.
+      <section className="container mx-auto px-4 py-16 border-t bg-muted/20">
+        <div className="max-w-5xl mx-auto space-y-12">
+          <div className="text-center space-y-3">
+            <h2 className="text-3xl font-bold tracking-tight">System Capabilities</h2>
+            <p className="text-muted-foreground max-w-lg mx-auto text-sm">
+              Discover the core tools enabling automated checks and administration.
             </p>
           </div>
 
-          <div className="bg-card p-6 rounded-lg shadow-card border border-border">
-            <div className="bg-destructive/10 rounded-full p-3 w-fit mb-4">
-              <AlertTriangle className="h-8 w-8 text-destructive" />
-            </div>
-            <h3 className="text-xl font-bold mb-2">Fraud Detection</h3>
-            <p className="text-muted-foreground">
-              Automated checks for duplicate chassis numbers, fake RCs, expired documents, and cloned vehicles across states.
-            </p>
-          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Card 1: Verify RC */}
+            <CardLayout
+              icon={<Search className="h-6 w-6 text-primary" />}
+              title="Verify RC"
+              desc="Search any vehicle registration certificate instantly by entering its unique RC number."
+              btnText="Search Registry"
+              onClick={() => navigate("/verify")}
+            />
 
-          <div className="bg-card p-6 rounded-lg shadow-card border border-border">
-            <div className="bg-info/10 rounded-full p-3 w-fit mb-4">
-              <BarChart3 className="h-8 w-8 text-info" />
-            </div>
-            <h3 className="text-xl font-bold mb-2">Analytics Dashboard</h3>
-            <p className="text-muted-foreground">
-              Comprehensive fraud reports, verification trends, and region-wise heatmaps for law enforcement.
-            </p>
+            {/* Card 2: Ownership Transfer */}
+            <CardLayout
+              icon={<Users className="h-6 w-6 text-primary" />}
+              title="Ownership Transfer"
+              desc="Maintain complete, cryptographically mapped logs of vehicle ownership changes."
+              btnText="Transfer Ownership"
+              onClick={() => navigate("/transfer")}
+            />
+
+            {/* Card 3: Fraud Detection */}
+            <CardLayout
+              icon={<AlertTriangle className="h-6 w-6 text-primary" />}
+              title="Fraud Detection"
+              desc="Detect suspicious behaviors, stolen flags, and inconsistency markers."
+              btnText="Run Audit"
+              onClick={() => navigate("/verify")}
+            />
+
+            {/* Card 4: Analytics */}
+            <CardLayout
+              icon={<BarChart3 className="h-6 w-6 text-primary" />}
+              title="Analytics"
+              desc="Monitor regional trends, monthly registrations, and fraud statistics."
+              btnText="View Reports"
+              onClick={() => navigate("/analytics")}
+            />
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="container mx-auto px-4 py-16 bg-muted/30 rounded-lg">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
-          <div className="grid md:grid-cols-4 gap-6">
-            {[
-              { step: "1", title: "Scan QR Code", desc: "Use your device to scan the QR code on the RC" },
-              { step: "2", title: "System Checks", desc: "Automated fraud detection runs instantly" },
-              { step: "3", title: "View Results", desc: "Get complete RC details and fraud score" },
-              { step: "4", title: "Audit Log", desc: "Every verification is logged for security" },
-            ].map((item) => (
-              <div key={item.step} className="text-center">
-                <div className="bg-primary text-primary-foreground rounded-full w-12 h-12 flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                  {item.step}
-                </div>
-                <h4 className="font-semibold mb-2">{item.title}</h4>
-                <p className="text-sm text-muted-foreground">{item.desc}</p>
-              </div>
-            ))}
+      {/* Why Choose Section */}
+      <section className="container mx-auto px-4 py-20 border-t">
+        <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6">
+            <h2 className="text-3xl font-bold tracking-tight">Why Choose RC Verification?</h2>
+            <p className="text-muted-foreground text-sm">
+              Our application offers secure, low-latency queries backed by solid infrastructure to help departments audit vehicle histories.
+            </p>
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-emerald-500" /> Fast Verification under 1 second</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-emerald-500" /> Proactive Fraud Flags (Stolen/Suspicious)</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-emerald-500" /> Complete Ownership History Timeline</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-emerald-500" /> Secure Admin Session Protection</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-emerald-500" /> Real-time System Metrics Integration</li>
+            </ul>
+          </div>
+          <div className="bg-muted p-8 rounded-2xl border flex items-center justify-center min-h-[250px]">
+            <Shield className="h-32 w-32 text-primary/30" />
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="max-w-3xl mx-auto text-center space-y-6">
-          <h2 className="text-4xl font-bold">Ready to Get Started?</h2>
-          <p className="text-xl text-muted-foreground">
-            Access the dashboard to start verifying vehicle registrations securely.
-          </p>
-          <Button size="lg" className="text-lg" onClick={() => navigate("/dashboard")}>
-            <Shield className="mr-2 h-5 w-5" />
-            Go to Dashboard
-          </Button>
+      {/* Technology Stack */}
+      <section className="container mx-auto px-4 py-16 border-t bg-muted/10">
+        <div className="max-w-5xl mx-auto space-y-8">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold tracking-tight mb-2">Technology Stack</h2>
+            <p className="text-muted-foreground text-sm">Built with modern enterprise-grade open source tech.</p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+            <TechBadge icon={<Code className="h-5 w-5 text-primary" />} label="React" />
+            <TechBadge icon={<Server className="h-5 w-5 text-primary" />} label="Spring Boot" />
+            <TechBadge icon={<Database className="h-5 w-5 text-primary" />} label="MongoDB" />
+            <TechBadge icon={<Code className="h-5 w-5 text-primary" />} label="Tailwind" />
+            <TechBadge icon={<Server className="h-5 w-5 text-primary" />} label="Java 21" />
+            <TechBadge icon={<BarChart3 className="h-5 w-5 text-primary" />} label="Prometheus" />
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-card/30 backdrop-blur-sm py-8">
-        <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>&copy; 2025 RC Verification System. Built for transparency and trust.</p>
-        </div>
+      <footer className="border-t py-8 bg-card/30 text-center text-xs text-muted-foreground">
+        <p>&copy; {new Date().getFullYear()} Drive Verify system. All rights reserved.</p>
       </footer>
+    </div>
+  );
+};
+
+/* Feature card sub-component */
+const CardLayout = ({ icon, title, desc, btnText, onClick }: { icon: React.ReactNode; title: string; desc: string; btnText: string; onClick: () => void }) => {
+  return (
+    <div className="bg-card p-6 rounded-xl border flex flex-col justify-between hover:shadow-md transition-shadow">
+      <div>
+        <div className="mb-4 bg-primary/5 p-3 rounded-lg w-fit">{icon}</div>
+        <h3 className="text-lg font-semibold tracking-tight mb-2">{title}</h3>
+        <p className="text-xs text-muted-foreground leading-relaxed mb-6">{desc}</p>
+      </div>
+      <Button variant="outline" size="sm" className="w-full" onClick={onClick}>
+        {btnText}
+      </Button>
+    </div>
+  );
+};
+
+/* Tech badge sub-component */
+const TechBadge = ({ icon, label }: { icon: React.ReactNode; label: string }) => {
+  return (
+    <div className="bg-card border p-4 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-muted/50 transition-colors">
+      {icon}
+      <span className="text-xs font-semibold">{label}</span>
     </div>
   );
 };

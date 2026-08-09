@@ -23,7 +23,7 @@ type Owner = { name: string; email?: string; phone?: string; address?: string; a
 
 const TransferOwnership = () => {
   const navigate = useNavigate();
-  const [adminKey, setAdminKey] = useState("");
+  const adminKey = localStorage.getItem("adminKey") || "";
   const [rcNumber, setRcNumber] = useState("");
   const [currentOwner, setCurrentOwner] = useState<Owner | null>(null);
   const [previousOwners, setPreviousOwners] = useState<string[]>([]);
@@ -56,8 +56,14 @@ const TransferOwnership = () => {
     }
   }, [rcNumber]);
 
-  // Prefill RC from query param and auto-load
+  // Prefill RC from query param and auto-load + Session check
   useEffect(() => {
+    const key = localStorage.getItem("adminKey");
+    if (!key) {
+      toast.error("Please start an Admin Session first.");
+      navigate("/auth");
+      return;
+    }
     const params = new URLSearchParams(window.location.search);
     const rc = params.get("rc");
     if (rc) {
@@ -65,7 +71,7 @@ const TransferOwnership = () => {
       // Defer fetch to next tick after state updates
       setTimeout(() => fetchRc(), 0);
     }
-  }, [fetchRc]);
+  }, [fetchRc, navigate]);
 
   // Transfer algorithm:
   // 1) Append current owner's name to previousOwners (if present)
@@ -101,7 +107,7 @@ const TransferOwnership = () => {
         },
         updatedAt: new Date().toISOString(),
       };
-      await apiClient.rc.update(rc.id, updated, adminKey);
+      await apiClient.rc.update(rc.id, updated);
       toast.success("Ownership transferred");
       setNewOwner({ name: "", email: "", phone: "", address: "", aadhaarLast4: "" });
       setPreviousOwners(updated.previousOwners);
@@ -138,10 +144,6 @@ const TransferOwnership = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid md:grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Admin Key</Label>
-                <Input value={adminKey} onChange={(e) => setAdminKey(e.target.value)} placeholder="Admin key" />
-              </div>
               <div className="space-y-2">
                 <Label>RC Number</Label>
                 <div className="flex gap-2">

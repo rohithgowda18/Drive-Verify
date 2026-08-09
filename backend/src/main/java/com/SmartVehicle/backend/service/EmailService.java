@@ -33,7 +33,7 @@ public class EmailService {
                 RC Number: %s
 
                 Thank you,
-                RC Verification System
+                Drive Verify System
                 """.formatted(name, rcNumber));
         mailSender.send(msg);
     }
@@ -52,7 +52,7 @@ public class EmailService {
                 has been successfully updated under your name.
 
                 Thank you,
-                RC Verification System
+                Drive Verify System
                 """.formatted(name, rcNumber));
         mailSender.send(msg);
     }

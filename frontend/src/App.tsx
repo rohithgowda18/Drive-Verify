@@ -13,7 +13,7 @@ import Analytics from "./pages/Analytics";
 import AdminUsers from "./pages/AdminUsers";
 import NotFound from "./pages/NotFound";
 import TransferOwnership from "./pages/TransferOwnership";
-// import Auth from "./pages/Auth";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -33,7 +33,7 @@ const App = () => (
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/admin/users" element={<AdminUsers />} />
           <Route path="/transfer" element={<TransferOwnership />} />
-          {/* <Route path="/auth" element={<Auth />} /> */}
+          <Route path="/auth" element={<Auth />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

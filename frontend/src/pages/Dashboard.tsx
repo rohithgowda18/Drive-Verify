@@ -1,11 +1,20 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, QrCode, Database, BarChart3, Users } from "lucide-react";
+import { Shield, QrCode, Database, BarChart3, Users, LogOut, Key } from "lucide-react";
+import { toast } from "sonner";
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState(!!localStorage.getItem("adminKey"));
+
+  const handleLogout = () => {
+    localStorage.removeItem("adminKey");
+    setIsAdmin(false);
+    toast.success("Admin Session Ended");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-hero">
@@ -13,11 +22,24 @@ const Dashboard = () => {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Shield className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold">RC Verification System</h1>
+            <h1 className="text-xl font-bold">Drive Verify</h1>
           </div>
-          <Button variant="outline" size="sm" onClick={() => navigate("/")}>
-            Home
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
+              Home
+            </Button>
+            {isAdmin ? (
+              <Button variant="destructive" size="sm" onClick={handleLogout}>
+                <LogOut className="h-4 w-4 mr-1.5" />
+                End Admin Session
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
+                <Key className="h-4 w-4 mr-1.5" />
+                Admin Session
+              </Button>
+            )}
+          </div>
         </div>
       </header>
 

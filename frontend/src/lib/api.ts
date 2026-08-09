@@ -84,8 +84,9 @@ export const apiClient = {
       return handleResponse(response);
     },
 
-    // Admin-only endpoints (require X-ADMIN-KEY)
-    create: async (rc: any, adminKey: string) => {
+    // Admin-only endpoints (automatically read X-ADMIN-KEY from localStorage)
+    create: async (rc: any) => {
+      const adminKey = localStorage.getItem("adminKey") || "";
       const response = await fetch(`${API_BASE_URL}/api/rc`, {
         method: "POST",
         headers: {
@@ -97,7 +98,8 @@ export const apiClient = {
       return handleResponse(response);
     },
 
-    update: async (id: string, rc: any, adminKey: string) => {
+    update: async (id: string, rc: any) => {
+      const adminKey = localStorage.getItem("adminKey") || "";
       const response = await fetch(`${API_BASE_URL}/api/rc/${id}`, {
         method: "PUT",
         headers: {
@@ -109,7 +111,8 @@ export const apiClient = {
       return handleResponse(response);
     },
 
-    remove: async (id: string, adminKey: string) => {
+    remove: async (id: string) => {
+      const adminKey = localStorage.getItem("adminKey") || "";
       const response = await fetch(`${API_BASE_URL}/api/rc/${id}`, {
         method: "DELETE",
         headers: {

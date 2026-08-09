@@ -55,8 +55,13 @@ const Verify = () => {
     setFraudChecks([]);
 
     try {
-      // Fetch RC data from backend and map to UI model
       const rc = await apiClient.rc.search(rcNumber);
+
+      if (!rc) {
+        toast.error("Vehicle Registration Certificate (RC) not found");
+        setLoading(false);
+        return;
+      }
 
       if ((rc as any)?.error) {
         toast.error((rc as any).error);
@@ -113,7 +118,7 @@ const Verify = () => {
           </Button>
           <div className="flex items-center gap-2">
             <Shield className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold">RC Verification</h1>
+            <h1 className="text-xl font-bold">Drive Verify</h1>
           </div>
         </div>
       </header>

@@ -1,12 +1,29 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, ArrowLeft, Trash2, RefreshCw, Eye, Replace, History } from "lucide-react";
+import { Shield, ArrowLeft, Trash2, RefreshCw, Eye, Replace, History, MoreVertical } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiClient } from "@/lib/api";
 import { vehicleCreateSchema } from "@/lib/validation";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 const Vehicles = () => {
   const navigate = useNavigate();
@@ -21,7 +38,54 @@ const Vehicles = () => {
   const [filterSuspicious, setFilterSuspicious] = useState<boolean | null>(null);
   interface Rc extends NewRc { id?: string; createdAt?: string; updatedAt?: string }
   const [items, setItems] = useState<Rc[]>([]);
-  const [adminKey, setAdminKey] = useState("");
+  const adminKey = localStorage.getItem("adminKey") || "";
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [vehicleToDelete, setVehicleToDelete] = useState<string | null>(null);
+
+  const getStatusBadge = (stolen?: boolean, suspicious?: boolean) => {
+    if (stolen) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
+          🚨 Stolen
+        </span>
+      );
+    }
+    if (suspicious) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
+          ⚠️ Suspicious
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+        🟢 Clean
+      </span>
+    );
+  };
+
+  const getInsuranceBadge = (insurance?: any) => {
+    if (!insurance || !insurance.validTill) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300">
+          No Insurance
+        </span>
+      );
+    }
+    const isPast = new Date(insurance.validTill).getTime() < Date.now();
+    if (isPast) {
+      return (
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
+          Expired ({insurance.provider || "Unknown"})
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">
+        Active ({insurance.provider || "Unknown"})
+      </span>
+    );
+  };
   type Owner = { name: string; email?: string; phone?: string; address?: string; aadhaarLast4?: string };
   type VehicleInfo = { make: string; model: string; manufactureYear: string | number; color?: string; fuelType?: string; type?: string; variant?: string };
   type Insurance = { provider?: string; policyNumber?: string; validTill?: string };
@@ -86,13 +150,9 @@ const Vehicles = () => {
   };
 
   const removeItem = async (id: string) => {
-    if (!adminKey) {
-      toast.error("Enter admin key to delete");
-      return;
-    }
     try {
       setLoading(true);
-      await apiClient.rc.remove(id, adminKey);
+      await apiClient.rc.remove(id);
       toast.success("Vehicle deleted");
       setItems(prev => prev.filter(v => v.id !== id));
     } catch (err: unknown) {
@@ -103,7 +163,15 @@ const Vehicles = () => {
     }
   };
 
-  useEffect(() => { loadPage(0); }, [filterState, filterMake, filterOwner, filterStolen, filterSuspicious]); // loadPage stable enough; suppress lint via comment
+  useEffect(() => {
+    const key = localStorage.getItem("adminKey");
+    if (!key) {
+      toast.error("Please start an Admin Session first.");
+      navigate("/auth");
+      return;
+    }
+    loadPage(0);
+  }, [filterState, filterMake, filterOwner, filterStolen, filterSuspicious, navigate]); // loadPage stable enough; suppress lint via comment
 
   return (
     <div className="min-h-screen bg-gradient-hero">
@@ -130,12 +198,6 @@ const Vehicles = () => {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2 mb-4">
-              <Input
-                placeholder="Admin key for delete"
-                value={adminKey}
-                onChange={(e) => setAdminKey(e.target.value)}
-                className="max-w-xs"
-              />
               <Button variant="outline" size="sm" onClick={() => loadPage(0)} disabled={loading}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
@@ -152,7 +214,6 @@ const Vehicles = () => {
                   <CardDescription>Provide details and submit with admin key.</CardDescription>
                 </CardHeader>
                 <CardContent className="grid md:grid-cols-2 gap-3">
-                  <Input placeholder="Admin Key" value={adminKey} onChange={(e) => setAdminKey(e.target.value)} />
                   <Input placeholder="RC Number" value={newRc.rcNumber} onChange={(e) => setNewRc({ ...newRc, rcNumber: e.target.value })} />
                   <Input placeholder="Owner Name" value={newRc.owner.name} onChange={(e) => setNewRc({ ...newRc, owner: { ...newRc.owner, name: e.target.value } })} />
                   <Input placeholder="Owner Email" value={newRc.owner.email} onChange={(e) => setNewRc({ ...newRc, owner: { ...newRc.owner, email: e.target.value } })} />
@@ -238,7 +299,7 @@ const Vehicles = () => {
                         }
                         try {
                           setLoading(true);
-                          const created = await apiClient.rc.create(payload, adminKey);
+                          const created = await apiClient.rc.create(payload);
                           toast.success("Vehicle created");
                           setItems((prev) => [created, ...prev]);
                           setShowCreate(false);
@@ -303,10 +364,14 @@ const Vehicles = () => {
                   <Card key={v.id} className="border">
                     <CardHeader className="py-3">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <CardTitle className="text-base">{v.rcNumber}</CardTitle>
-                          <CardDescription>
-                            {v.vehicleInfo?.make} {v.vehicleInfo?.model} • {v.owner?.name}
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <CardTitle className="text-base font-bold">{v.rcNumber}</CardTitle>
+                            {getStatusBadge(v.stolen, v.suspicious)}
+                            {getInsuranceBadge(v.insurance)}
+                          </div>
+                          <CardDescription className="text-sm">
+                            {v.vehicleInfo?.make} {v.vehicleInfo?.model} • Owner: <span className="font-medium text-foreground">{v.owner?.name}</span>
                           </CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
@@ -326,35 +391,49 @@ const Vehicles = () => {
                           >
                             <History className="h-4 w-4 mr-1" /> History
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => v?.rcNumber && navigate(`/transfer?rc=${encodeURIComponent(v.rcNumber)}`)}
-                            disabled={!v?.rcNumber}
-                          >
-                            <Replace className="h-4 w-4 mr-1" /> Transfer
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => v?.id && removeItem(v.id)}
-                            disabled={!v?.id}
-                          >
-                          <Trash2 className="h-4 w-4 mr-1" /> Delete
-                          </Button>
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => v?.rcNumber && navigate(`/transfer?rc=${encodeURIComponent(v.rcNumber)}`)}
+                                disabled={!v?.rcNumber}
+                              >
+                                <Replace className="h-4 w-4 mr-2" /> Transfer Ownership
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onClick={() => {
+                                  if (v?.id) {
+                                    setVehicleToDelete(v.id);
+                                    setDeleteConfirmOpen(true);
+                                  }
+                                }}
+                                disabled={!v?.id}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" /> Delete Vehicle
+                              </DropdownMenuItem>
+                              <DropdownMenuItem disabled>
+                                Generate Report (Coming Soon)
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent className="pt-0 text-sm">
                       <div className="grid sm:grid-cols-2 gap-2">
                         <div>
-                          <div>Owners Count: {v.ownersCount}</div>
-                          <div>Previous Owners: {Array.isArray(v.previousOwners) ? v.previousOwners.join(", ") : ""}</div>
+                          <div>Owners Count: {v.ownersCount || (1 + (v.previousOwners?.length || 0))}</div>
+                          <div>Previous Owners: {Array.isArray(v.previousOwners) && v.previousOwners.length > 0 ? v.previousOwners.join(", ") : "None"}</div>
                         </div>
                         <div>
-                          <div>Chassis: {v.chassisNumber}</div>
-                          <div>Engine: {v.engineNumber}</div>
-                          <div>Insurance: {v.insurance?.provider} ({v.insurance?.policyNumber})</div>
+                          <div>Chassis: {v.chassisNumber || v.vehicleInfo?.chassisNumber || "—"}</div>
+                          <div>Engine: {v.engineNumber || v.vehicleInfo?.engineNumber || "—"}</div>
                         </div>
                       </div>
                     </CardContent>
@@ -370,6 +449,35 @@ const Vehicles = () => {
           </CardContent>
         </Card>
       </main>
+
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this vehicle?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the vehicle registration certificate (RC) from the database.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setDeleteConfirmOpen(false);
+              setVehicleToDelete(null);
+            }}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={async () => {
+                if (vehicleToDelete) {
+                  await removeItem(vehicleToDelete);
+                }
+                setDeleteConfirmOpen(false);
+                setVehicleToDelete(null);
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
