@@ -55,12 +55,15 @@ public class RcServiceImpl implements RcService {
         Rc found = repo.findByRcNumber(rcNumber);
         rcSearchCounter.increment();
         if (found != null) {
-            if (found.getVerified() == null) {
-                found.setVerified(1);
-            } else {
-                found.setVerified(found.getVerified() + 1);
-            }
-            repo.save(found);
+            org.springframework.data.mongodb.core.query.Query query = new org.springframework.data.mongodb.core.query.Query(
+                    org.springframework.data.mongodb.core.query.Criteria.where("rcNumber").is(rcNumber)
+            );
+            org.springframework.data.mongodb.core.query.Update update = new org.springframework.data.mongodb.core.query.Update()
+                    .inc("verified", 1)
+                    .set("updatedAt", Instant.now());
+            mongoTemplate.updateFirst(query, update, Rc.class);
+            found.setVerified((found.getVerified() == null ? 0 : found.getVerified()) + 1);
+            found.setUpdatedAt(Instant.now());
         }
         return found;
     }

@@ -34,12 +34,14 @@ public class RcController {
     private final RcService rcService;
     private final AdminKeyValidator adminKeyValidator;
     private final OwnershipHistoryRepository ownershipHistoryRepository;
+    private final org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
 
     @Autowired
-    public RcController(RcService rcService, AdminKeyValidator adminKeyValidator, OwnershipHistoryRepository ownershipHistoryRepository) {
+    public RcController(RcService rcService, AdminKeyValidator adminKeyValidator, OwnershipHistoryRepository ownershipHistoryRepository, org.springframework.data.mongodb.core.MongoTemplate mongoTemplate) {
         this.rcService = rcService;
         this.adminKeyValidator = adminKeyValidator;
         this.ownershipHistoryRepository = ownershipHistoryRepository;
+        this.mongoTemplate = mongoTemplate;
     }
 
     @GetMapping
@@ -77,9 +79,14 @@ public class RcController {
         RiskAssessment assessment = riskAssessmentService.evaluate(existingRc, sellerClaim, null);
 
         if (existingRc != null) {
-            existingRc.setSellerClaim(sellerClaim);
-            existingRc.setRiskAssessment(assessment);
-            rcService.update(existingRc.getId(), existingRc);
+            org.springframework.data.mongodb.core.query.Query query = new org.springframework.data.mongodb.core.query.Query(
+                    org.springframework.data.mongodb.core.query.Criteria.where("rcNumber").is(cleanRcNumber)
+            );
+            org.springframework.data.mongodb.core.query.Update update = new org.springframework.data.mongodb.core.query.Update()
+                    .set("sellerClaim", sellerClaim)
+                    .set("riskAssessment", assessment)
+                    .set("updatedAt", java.time.Instant.now());
+            mongoTemplate.updateFirst(query, update, Rc.class);
         }
 
         return assessment;
