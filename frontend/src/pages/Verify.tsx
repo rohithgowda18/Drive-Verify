@@ -71,13 +71,44 @@ const Verify = () => {
   };
 
   const getScoreBadge = (score: number, level: string) => {
-    if (level === "LOW") {
-      return <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white text-lg px-4 py-1">🟢 LOW RISK ({score}/100)</Badge>;
-    }
-    if (level === "MEDIUM") {
-      return <Badge className="bg-amber-500 hover:bg-amber-600 text-white text-lg px-4 py-1">🟡 REVIEW REQUIRED ({score}/100)</Badge>;
-    }
-    return <Badge className="bg-destructive hover:bg-destructive/90 text-white text-lg px-4 py-1">🔴 HIGH RISK ({score}/100)</Badge>;
+    const isLow = level === "LOW";
+    const isMed = level === "MEDIUM";
+    const colorClass = isLow ? "text-emerald-500 stroke-emerald-500" : isMed ? "text-amber-500 stroke-amber-500" : "text-rose-500 stroke-rose-500";
+    const bgClass = isLow ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 text-emerald-700 dark:text-emerald-300" : isMed ? "bg-amber-50 dark:bg-amber-950/30 border-amber-200 text-amber-700 dark:text-amber-300" : "bg-rose-50 dark:bg-rose-950/30 border-rose-200 text-rose-700 dark:text-rose-300";
+
+    const circumference = 2 * Math.PI * 36;
+    const strokeDashoffset = circumference - (score / 100) * circumference;
+
+    return (
+      <div className="flex items-center gap-4">
+        {/* Radial Score Gauge */}
+        <div className="relative w-20 h-20 flex items-center justify-center">
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="36" className="stroke-muted" strokeWidth="6" fill="transparent" />
+            <circle
+              cx="40"
+              cy="40"
+              r="36"
+              className={`${colorClass} transition-all duration-1000 ease-out`}
+              strokeWidth="6"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              fill="transparent"
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-xl font-extrabold tracking-tight">{score}</span>
+            <span className="text-[9px] uppercase font-bold text-muted-foreground">/ 100</span>
+          </div>
+        </div>
+
+        {/* Text Badge */}
+        <div className={`px-4 py-2 rounded-xl border font-bold text-sm flex items-center gap-2 shadow-sm ${bgClass}`}>
+          {isLow ? "🟢 LOW RISK" : isMed ? "🟡 REVIEW REQUIRED" : "🔴 HIGH RISK"}
+        </div>
+      </div>
+    );
   };
 
   const maskPII = (val?: string) => {

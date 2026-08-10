@@ -1,0 +1,206 @@
+{
+  "info": {
+    "_postman_id": "c1f2e3d4-5678-490a-bcde-f1234567890a",
+    "name": "Drive Verify API",
+    "description": "Postman Collection for Drive Verify — Vehicle Transaction Trust & Risk Platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Public APIs",
+      "item": [
+        {
+          "name": "Evaluate Risk & Seller Claims",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rcNumber\": \"KA01AB1234\",\n  \"sellerClaim\": {\n    \"claimedOwnerCount\": 1,\n    \"claimedMileage\": 48000\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/rc/evaluate",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "rc", "evaluate"]
+            },
+            "description": "Evaluates vehicle risk score (0-100), mismatches, and inspection checklists against seller claims."
+          }
+        },
+        {
+          "name": "Search Vehicle by RC Number",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/rc/search?rcNumber=KA01AB1234",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "rc", "search"],
+              "query": [
+                {
+                  "key": "rcNumber",
+                  "value": "KA01AB1234"
+                }
+              ]
+            },
+            "description": "Searches vehicle database by exact RC registration number."
+          }
+        },
+        {
+          "name": "Get Ownership Transfer History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/rc/66b8f1a2b3c4d5e6f7a8b9c0/history",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "rc", "66b8f1a2b3c4d5e6f7a8b9c0", "history"]
+            },
+            "description": "Returns chronological ownership transfer history for a given vehicle ID."
+          }
+        },
+        {
+          "name": "Get System Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/rc/stats",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "rc", "stats"]
+            },
+            "description": "Returns total count, verified count, stolen/suspicious counts, and transfer stats."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin APIs",
+      "item": [
+        {
+          "name": "Create Vehicle Record",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Admin-Secret-Key",
+                "value": "secret-admin-key",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rcNumber\": \"KA05MH9999\",\n  \"registrationState\": \"Karnataka\",\n  \"chassisNumber\": \"CHS98765432109876\",\n  \"engineNumber\": \"ENG1234567890123\",\n  \"stolen\": false,\n  \"suspicious\": false,\n  \"owner\": {\n    \"name\": \"Rohith Gowda\",\n    \"phone\": \"9876543210\",\n    \"email\": \"rohith@example.com\",\n    \"address\": \"Bengaluru, Karnataka\",\n    \"aadhaarLast4\": \"4321\"\n  },\n  \"vehicleInfo\": {\n    \"make\": \"Honda\",\n    \"model\": \"City ZX\",\n    \"fuelType\": \"PETROL\",\n    \"color\": \"White\"\n  },\n  \"registrationInfo\": {\n    \"date\": \"2022-05-15T00:00:00Z\",\n    \"state\": \"Karnataka\",\n    \"active\": true\n  },\n  \"insurance\": {\n    \"provider\": \"HDFC ERGO\",\n    \"policyNumber\": \"POL-88776655\",\n    \"validTill\": \"2027-05-15T00:00:00Z\"\n  },\n  \"puc\": {\n    \"certificateNumber\": \"PUC-99887766\",\n    \"validTill\": \"2026-11-15T00:00:00Z\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/rc",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "rc"]
+            },
+            "description": "Creates a new vehicle record in MongoDB."
+          }
+        },
+        {
+          "name": "Update Vehicle / Transfer Ownership",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "X-Admin-Secret-Key",
+                "value": "secret-admin-key",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rcNumber\": \"KA01AB1234\",\n  \"registrationState\": \"Karnataka\",\n  \"chassisNumber\": \"CHS12345678901234\",\n  \"engineNumber\": \"ENG98765432109876\",\n  \"stolen\": false,\n  \"suspicious\": false,\n  \"version\": 0,\n  \"owner\": {\n    \"name\": \"Darshan Kumar\",\n    \"phone\": \"9123456789\",\n    \"email\": \"darshan@example.com\",\n    \"address\": \"Mysuru, Karnataka\",\n    \"aadhaarLast4\": \"8765\"\n  },\n  \"vehicleInfo\": {\n    \"make\": \"Honda\",\n    \"model\": \"City\",\n    \"fuelType\": \"PETROL\",\n    \"color\": \"Silver\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/rc/66b8f1a2b3c4d5e6f7a8b9c0",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "rc", "66b8f1a2b3c4d5e6f7a8b9c0"]
+            },
+            "description": "Updates vehicle details or executes an ownership transfer."
+          }
+        },
+        {
+          "name": "Get Paginated Vehicles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/rc/page?page=0&size=10&registrationState=Karnataka",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "rc", "page"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "registrationState",
+                  "value": "Karnataka"
+                }
+              ]
+            },
+            "description": "Retrieves filtered and paginated list of vehicle records from MongoDB."
+          }
+        },
+        {
+          "name": "Delete Vehicle Record",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-Admin-Secret-Key",
+                "value": "secret-admin-key",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8080/api/rc/66b8f1a2b3c4d5e6f7a8b9c0",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "rc", "66b8f1a2b3c4d5e6f7a8b9c0"]
+            },
+            "description": "Deletes a vehicle record by ID."
+          }
+        }
+      ]
+    }
+  ]
+}
