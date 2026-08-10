@@ -20,6 +20,9 @@ import com.SmartVehicle.backend.model.Rc;
 import com.SmartVehicle.backend.service.RcService;
 import com.SmartVehicle.backend.repository.OwnershipHistoryRepository;
 import com.SmartVehicle.backend.model.OwnershipHistory;
+import com.SmartVehicle.backend.model.SellerClaim;
+import com.SmartVehicle.backend.model.RiskAssessment;
+import com.SmartVehicle.backend.service.RiskAssessmentService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -60,10 +63,10 @@ public class RcController {
     }
 
     @Autowired
-    private com.SmartVehicle.backend.service.RiskAssessmentService riskAssessmentService;
+    private RiskAssessmentService riskAssessmentService;
 
     @PostMapping("/evaluate")
-    public com.SmartVehicle.backend.model.RiskAssessment evaluateVehicle(@RequestBody com.SmartVehicle.backend.model.Rc requestPayload) {
+    public RiskAssessment evaluateVehicle(@RequestBody Rc requestPayload) {
         if (requestPayload.getRcNumber() == null || requestPayload.getRcNumber().isBlank()) {
             throw new IllegalArgumentException("rcNumber is required");
         }
