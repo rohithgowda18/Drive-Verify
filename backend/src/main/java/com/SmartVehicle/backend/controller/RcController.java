@@ -67,8 +67,19 @@ public class RcController {
         if (requestPayload.getRcNumber() == null || requestPayload.getRcNumber().isBlank()) {
             throw new IllegalArgumentException("rcNumber is required");
         }
-        Rc rc = rcService.searchByRcNumber(requestPayload.getRcNumber().trim());
-        return riskAssessmentService.evaluate(rc, requestPayload.getSellerClaim(), null);
+        String cleanRcNumber = requestPayload.getRcNumber().trim();
+        Rc existingRc = rcService.searchByRcNumber(cleanRcNumber);
+
+        SellerClaim sellerClaim = requestPayload.getSellerClaim();
+        RiskAssessment assessment = riskAssessmentService.evaluate(existingRc, sellerClaim, null);
+
+        if (existingRc != null) {
+            existingRc.setSellerClaim(sellerClaim);
+            existingRc.setRiskAssessment(assessment);
+            rcService.update(existingRc.getId(), existingRc);
+        }
+
+        return assessment;
     }
 
     @GetMapping("/stats")
