@@ -81,20 +81,19 @@ Backend runs on `http://localhost:8080`. Prometheus metrics at `http://localhost
 
 ## Configuration
 
-`backend/src/main/resources/application.properties`:
+Environment variables can be set via system environment variables or configured in `backend/src/main/resources/application.properties`:
+
 ```properties
-server.port=8080
+server.port=${PORT:8080}
 
-# Spring Boot MongoDB Configuration (both legacy and standard keys supported)
-spring.mongodb.uri=mongodb+srv://<username>:<password>@cluster0.aoda8xk.mongodb.net/?appName=Cluster0
-spring.mongodb.database=vehicledb
-spring.mongodb.auto-index-creation=true
-
-spring.data.mongodb.uri=mongodb+srv://<username>:<password>@cluster0.aoda8xk.mongodb.net/?appName=Cluster0
-spring.data.mongodb.database=vehicledb
+# Spring Data MongoDB Configuration
+spring.data.mongodb.uri=${SPRING_DATA_MONGODB_URI:mongodb+srv://<username>:<password>@cluster0.aoda8xk.mongodb.net/?appName=Cluster0}
+spring.data.mongodb.database=${SPRING_DATA_MONGODB_DATABASE:vehicledb}
 spring.data.mongodb.auto-index-creation=true
 
-admin.secret.key=your_admin_secret_key
+# Admin Authorization Secret Key
+admin.secret.key=${ADMIN_SECRET_KEY:secret-admin-key}
+
 management.endpoints.web.exposure.include=health,info,prometheus
 ```
 
