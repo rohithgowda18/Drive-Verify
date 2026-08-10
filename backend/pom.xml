@@ -57,6 +57,13 @@
 		</dependency>
 
 
+		<!-- Spring Dotenv for automatic .env loading without code changes -->
+		<dependency>
+			<groupId>me.paulschwarz</groupId>
+			<artifactId>spring-dotenv</artifactId>
+			<version>4.0.0</version>
+		</dependency>
+
 		<!-- Hot reload (optional) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
