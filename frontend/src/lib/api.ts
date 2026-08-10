@@ -122,4 +122,38 @@ export const apiClient = {
       return handleResponse(response);
     },
   },
+  verifications: {
+    create: async (data: { rcNumber: string; requesterEmail?: string; requestType?: string; sellerClaim?: any; evidences?: any[] }) => {
+      const response = await fetch(`${API_BASE_URL}/api/verifications`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      return handleResponse(response);
+    },
+
+    getById: async (id: string) => {
+      const response = await fetch(`${API_BASE_URL}/api/verifications/${id}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      return handleResponse(response);
+    },
+
+    getByRcNumber: async (rcNumber: string) => {
+      const response = await fetch(`${API_BASE_URL}/api/verifications/vehicle/${encodeURIComponent(rcNumber)}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      return handleResponse(response);
+    },
+
+    getTimeline: async (rcNumber: string) => {
+      const response = await fetch(`${API_BASE_URL}/api/verifications/vehicle/${encodeURIComponent(rcNumber)}/timeline`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      return handleResponse(response);
+    },
+  },
 };

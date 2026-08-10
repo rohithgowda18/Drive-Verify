@@ -34,6 +34,12 @@ public class Rc {
     private Instant createdAt;
     private Instant updatedAt;
 
+    @org.springframework.data.annotation.Version
+    private Long version;
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
+
     // Getters & Setters (explicit to ensure Jackson binding without Lombok)
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }

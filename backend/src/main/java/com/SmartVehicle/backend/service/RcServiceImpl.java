@@ -124,27 +124,28 @@ public class RcServiceImpl implements RcService {
         rcDeleteCounter.increment();
     }
 
+    @Autowired
+    private org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
+
     @Override
     public List<Rc> getFiltered(String registrationState, Boolean stolen, Boolean suspicious, String make, String ownerName) {
-        List<Rc> all = repo.findAll();
-        return all.stream().filter(rc -> {
-            if (registrationState != null && !registrationState.isBlank()) {
-                if (rc.getRegistrationState() == null || !rc.getRegistrationState().toLowerCase().contains(registrationState.toLowerCase())) return false;
-            }
-            if (stolen != null) {
-                if (!Boolean.valueOf(stolen).equals(rc.getStolen())) return false;
-            }
-            if (suspicious != null) {
-                if (!Boolean.valueOf(suspicious).equals(rc.getSuspicious())) return false;
-            }
-            if (make != null && !make.isBlank()) {
-                if (rc.getVehicleInfo() == null || rc.getVehicleInfo().getMake() == null || !rc.getVehicleInfo().getMake().toLowerCase().contains(make.toLowerCase())) return false;
-            }
-            if (ownerName != null && !ownerName.isBlank()) {
-                if (rc.getOwner() == null || rc.getOwner().getName() == null || !rc.getOwner().getName().toLowerCase().contains(ownerName.toLowerCase())) return false;
-            }
-            return true;
-        }).toList();
+        org.springframework.data.mongodb.core.query.Query query = new org.springframework.data.mongodb.core.query.Query();
+        if (registrationState != null && !registrationState.isBlank()) {
+            query.addCriteria(org.springframework.data.mongodb.core.query.Criteria.where("registrationState").regex(registrationState, "i"));
+        }
+        if (stolen != null) {
+            query.addCriteria(org.springframework.data.mongodb.core.query.Criteria.where("stolen").is(stolen));
+        }
+        if (suspicious != null) {
+            query.addCriteria(org.springframework.data.mongodb.core.query.Criteria.where("suspicious").is(suspicious));
+        }
+        if (make != null && !make.isBlank()) {
+            query.addCriteria(org.springframework.data.mongodb.core.query.Criteria.where("vehicleInfo.make").regex(make, "i"));
+        }
+        if (ownerName != null && !ownerName.isBlank()) {
+            query.addCriteria(org.springframework.data.mongodb.core.query.Criteria.where("owner.name").regex(ownerName, "i"));
+        }
+        return mongoTemplate.find(query, Rc.class);
     }
 
     private void validateRequired(Rc rc) {

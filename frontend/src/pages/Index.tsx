@@ -21,24 +21,28 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-24">
+      <section className="container mx-auto px-4 py-20">
         <div className="max-w-4xl mx-auto text-center space-y-6">
           <div className="inline-block">
-            <div className="bg-primary/10 border border-primary/20 rounded-full px-4 py-1 text-sm text-primary font-semibold mb-6 flex items-center gap-1.5">
-              <ShieldCheck className="h-4 w-4" /> Next-Gen Vehicle Registry
+            <div className="bg-primary/10 border border-primary/20 rounded-full px-4 py-1 text-sm text-primary font-semibold mb-6 flex items-center gap-1.5 justify-center">
+              <ShieldCheck className="h-4 w-4" /> Vehicle Transaction Trust & Risk Platform
             </div>
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold leading-tight tracking-tight">
-            Drive Verify &<br />
-            <span className="text-primary bg-clip-text">Fraud Detection System</span>
+          <h1 className="text-4xl md:text-6xl font-bold leading-tight tracking-tight">
+            Before You Buy a Used Vehicle,<br />
+            <span className="text-primary bg-clip-text">Know What the Evidence Says.</span>
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Instantly verify vehicle Registration Certificates, track chronological ownership transfers, and identify risk metrics seamlessly.
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Drive Verify evaluates seller claims against vehicle registry records, document history, and risk signals to deliver transparent, explainable transaction risk assessments.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
-            <Button size="lg" className="text-lg px-8" onClick={() => navigate("/dashboard")}>
+            <Button size="lg" className="text-lg px-8 shadow-lg" onClick={() => navigate("/verify")}>
               <Shield className="mr-2 h-5 w-5" />
-              Go to Dashboard
+              Verify a Vehicle (Buyer)
+            </Button>
+            <Button size="lg" variant="outline" className="text-lg px-8" onClick={() => navigate("/verify")}>
+              <Users className="mr-2 h-5 w-5" />
+              I'm Selling a Vehicle
             </Button>
           </div>
         </div>
