@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, ArrowLeft, BarChart3, TrendingUp, AlertTriangle, CheckCircle2, History, ShieldAlert, Award } from "lucide-react";
+import { Shield, ArrowLeft, BarChart3, CheckCircle2, History, ShieldAlert, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, PieChart, Pie, Cell, Legend } from "recharts";
@@ -32,7 +32,6 @@ const Analytics = () => {
     load();
   }, []);
 
-  // Compute clean counts for Pie Chart: Total - (Stolen + Suspicious)
   const getPieData = () => {
     if (!stats) return [];
     const stolen = stats.stolenCount || 0;
@@ -51,11 +50,11 @@ const Analytics = () => {
         <div className="container mx-auto px-4 py-4 flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            Back to Dashboard
           </Button>
           <div className="flex items-center gap-2">
             <Shield className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold">Fraud Analytics</h1>
+            <h1 className="text-xl font-bold">Fraud & System Analytics</h1>
           </div>
         </div>
       </header>
@@ -64,9 +63,9 @@ const Analytics = () => {
         <Card className="shadow-elevated mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-6 w-6 text-primary" /> Fraud Detection Analytics
+              <BarChart3 className="h-6 w-6 text-primary" /> Fraud & Verification Analytics
             </CardTitle>
-            <CardDescription>Overview of registration certificates, fraud patterns, and verification metrics.</CardDescription>
+            <CardDescription>System-wide vehicle risk indicators and registration statistics.</CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-8">
@@ -82,8 +81,8 @@ const Analytics = () => {
               </div>
             ) : (
               <div className="space-y-6">
-                {/* Row 1 KPIs */}
-                <div className="grid md:grid-cols-3 gap-4">
+                {/* Key Metrics */}
+                <div className="grid md:grid-cols-4 gap-4">
                   <Card className="border shadow-card flex items-center">
                     <CardHeader className="p-4 flex-shrink-0">
                       <div className="bg-primary/10 text-primary p-3 rounded-full">
@@ -98,33 +97,16 @@ const Analytics = () => {
 
                   <Card className="border shadow-card flex items-center">
                     <CardHeader className="p-4 flex-shrink-0">
-                      <div className="bg-success/10 text-success p-3 rounded-full">
+                      <div className="bg-emerald-500/10 text-emerald-600 p-3 rounded-full">
                         <CheckCircle2 className="h-6 w-6" />
                       </div>
                     </CardHeader>
                     <CardContent className="p-4 pl-0">
-                      <p className="text-sm font-medium text-muted-foreground">Verified Registrations</p>
+                      <p className="text-sm font-medium text-muted-foreground">Verified Active</p>
                       <h3 className="text-2xl font-bold">{stats.activeCount}</h3>
                     </CardContent>
                   </Card>
 
-                  <Card className="border shadow-card flex items-center relative overflow-hidden">
-                    <CardHeader className="p-4 flex-shrink-0">
-                      <div className="bg-muted text-muted-foreground p-3 rounded-full">
-                        <History className="h-6 w-6" />
-                      </div>
-                    </CardHeader>
-                    <CardContent className="p-4 pl-0">
-                      <p className="text-sm font-medium text-muted-foreground">Ownership Transfers</p>
-                      <h3 className="text-sm font-medium text-muted-foreground italic">
-                        Available when backend supports this metric
-                      </h3>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Row 2 KPIs */}
-                <div className="grid md:grid-cols-3 gap-4">
                   <Card className="border shadow-card flex items-center">
                     <CardHeader className="p-4 flex-shrink-0">
                       <div className="bg-destructive/10 text-destructive p-3 rounded-full">
@@ -132,39 +114,54 @@ const Analytics = () => {
                       </div>
                     </CardHeader>
                     <CardContent className="p-4 pl-0">
-                      <p className="text-sm font-medium text-muted-foreground">Stolen Vehicles</p>
+                      <p className="text-sm font-medium text-muted-foreground">Stolen Flagged</p>
                       <h3 className="text-2xl font-bold text-destructive">{stats.stolenCount}</h3>
                     </CardContent>
                   </Card>
 
                   <Card className="border shadow-card flex items-center">
                     <CardHeader className="p-4 flex-shrink-0">
-                      <div className="bg-warning/10 text-warning p-3 rounded-full">
+                      <div className="bg-amber-500/10 text-amber-600 p-3 rounded-full">
                         <AlertTriangle className="h-6 w-6" />
                       </div>
                     </CardHeader>
                     <CardContent className="p-4 pl-0">
-                      <p className="text-sm font-medium text-muted-foreground">Suspicious Vehicles</p>
-                      <h3 className="text-2xl font-bold text-warning">{stats.suspiciousCount}</h3>
+                      <p className="text-sm font-medium text-muted-foreground">Suspicious Flagged</p>
+                      <h3 className="text-2xl font-bold text-amber-600">{stats.suspiciousCount}</h3>
                     </CardContent>
                   </Card>
+                </div>
 
-                  <Card className="border shadow-card flex items-center relative overflow-hidden">
+                {/* Second Row Metric */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <Card className="border shadow-card flex items-center">
                     <CardHeader className="p-4 flex-shrink-0">
-                      <div className="bg-muted text-muted-foreground p-3 rounded-full">
-                        <Award className="h-6 w-6" />
+                      <div className="bg-blue-500/10 text-blue-600 p-3 rounded-full">
+                        <History className="h-6 w-6" />
                       </div>
                     </CardHeader>
                     <CardContent className="p-4 pl-0">
-                      <p className="text-sm font-medium text-muted-foreground">Active Insurance</p>
-                      <h3 className="text-sm font-medium text-muted-foreground italic">
-                        Available when backend supports this metric
+                      <p className="text-sm font-medium text-muted-foreground">Recorded Ownership Transfers</p>
+                      <h3 className="text-2xl font-bold">{stats.ownershipTransfersCount || 0}</h3>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border shadow-card flex items-center">
+                    <CardHeader className="p-4 flex-shrink-0">
+                      <div className="bg-primary/10 text-primary p-3 rounded-full">
+                        <Shield className="h-6 w-6" />
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-4 pl-0">
+                      <p className="text-sm font-medium text-muted-foreground">Clean Registered Ratio</p>
+                      <h3 className="text-2xl font-bold">
+                        {stats.total ? Math.round((((stats.total - (stats.stolenCount + stats.suspiciousCount)) / stats.total) * 100)) : 100}%
                       </h3>
                     </CardContent>
                   </Card>
                 </div>
 
-                {/* Row 3: Charts */}
+                {/* Charts */}
                 <div className="grid md:grid-cols-2 gap-6">
                   {/* Registrations by State */}
                   <Card className="border shadow-card">
@@ -194,7 +191,7 @@ const Analytics = () => {
                   {/* Fraud Distribution (Pie Chart) */}
                   <Card className="border shadow-card">
                     <CardHeader className="py-4">
-                      <CardTitle className="text-base font-semibold">Fraud Distribution</CardTitle>
+                      <CardTitle className="text-base font-semibold">Risk Distribution</CardTitle>
                     </CardHeader>
                     <CardContent className="flex flex-col items-center justify-center min-h-[300px]">
                       <PieChart width={300} height={250}>
@@ -207,7 +204,7 @@ const Analytics = () => {
                           paddingAngle={5}
                           dataKey="value"
                         >
-                          {getPieData().map((entry, index) => (
+                          {getPieData().map((_, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
@@ -218,9 +215,9 @@ const Analytics = () => {
                   </Card>
 
                   {/* Monthly Verifications */}
-                  <Card className="border shadow-card">
+                  <Card className="border shadow-card md:col-span-2">
                     <CardHeader className="py-4">
-                      <CardTitle className="text-base font-semibold">Monthly Verifications</CardTitle>
+                      <CardTitle className="text-base font-semibold">Monthly Verifications Trend</CardTitle>
                     </CardHeader>
                     <CardContent className="flex justify-center min-h-[300px]">
                       {Array.isArray(stats.monthlyVerifications) && stats.monthlyVerifications.length > 0 ? (
@@ -239,34 +236,6 @@ const Analytics = () => {
                       ) : (
                         <p className="text-muted-foreground self-center">No verification history.</p>
                       )}
-                    </CardContent>
-                  </Card>
-
-                  {/* Vehicle Manufacturer Distribution Placeholder */}
-                  <Card className="border shadow-card flex flex-col justify-between">
-                    <CardHeader className="py-4">
-                      <CardTitle className="text-base font-semibold">Manufacturer Distribution</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex flex-col items-center justify-center flex-grow py-8 text-center bg-muted/20 border-t">
-                      <BarChart3 className="h-10 w-10 text-muted-foreground mb-2" />
-                      <p className="text-sm font-semibold text-muted-foreground">Manufacturer Distribution Chart</p>
-                      <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
-                        Available when backend supports this metric
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  {/* Ownership Transfers Over Time Placeholder */}
-                  <Card className="border shadow-card flex flex-col justify-between md:col-span-2">
-                    <CardHeader className="py-4">
-                      <CardTitle className="text-base font-semibold">Ownership Transfers Over Time</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex flex-col items-center justify-center flex-grow py-12 text-center bg-muted/20 border-t">
-                      <TrendingUp className="h-10 w-10 text-muted-foreground mb-2" />
-                      <p className="text-sm font-semibold text-muted-foreground">Transfers Timeline Trend</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Available when backend supports this metric
-                      </p>
                     </CardContent>
                   </Card>
                 </div>

@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, CheckCircle2, AlertTriangle, Search, BarChart3, Users, HelpCircle, ArrowRight, Server, Database, Code, ShieldCheck } from "lucide-react";
+import { Shield, CheckCircle2, Search, ArrowRight, ShieldCheck, FileText, Scale, History, UserCheck, AlertTriangle } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -14,9 +14,14 @@ const Index = () => {
             <Shield className="h-6 w-6 text-primary animate-pulse" />
             <span className="text-xl font-bold tracking-tight">Drive Verify</span>
           </div>
-          <Button onClick={() => navigate("/dashboard")}>
-            Get Started <ArrowRight className="h-4 w-4 ml-1.5" />
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")}>
+              Admin Portal
+            </Button>
+            <Button size="sm" onClick={() => navigate("/verify")}>
+              Verify a Vehicle <ArrowRight className="h-4 w-4 ml-1.5" />
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -33,7 +38,7 @@ const Index = () => {
             <span className="text-primary bg-clip-text">Know What the Evidence Says.</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Drive Verify evaluates seller claims against vehicle registry records, document history, and risk signals to deliver transparent, explainable transaction risk assessments.
+            Drive Verify compares vehicle information, ownership history, seller claims, and available evidence to identify inconsistencies before you make a purchase.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
             <Button size="lg" className="text-lg px-8 shadow-lg" onClick={() => navigate("/verify")}>
@@ -41,134 +46,101 @@ const Index = () => {
               Verify a Vehicle (Buyer)
             </Button>
             <Button size="lg" variant="outline" className="text-lg px-8" onClick={() => navigate("/verify")}>
-              <Users className="mr-2 h-5 w-5" />
+              <UserCheck className="mr-2 h-5 w-5" />
               I'm Selling a Vehicle
             </Button>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Why Verify Section */}
       <section className="container mx-auto px-4 py-16 border-t bg-muted/20">
         <div className="max-w-5xl mx-auto space-y-12">
           <div className="text-center space-y-3">
-            <h2 className="text-3xl font-bold tracking-tight">System Capabilities</h2>
+            <h2 className="text-3xl font-bold tracking-tight">Why Verify Before You Buy?</h2>
             <p className="text-muted-foreground max-w-lg mx-auto text-sm">
-              Discover the core tools enabling automated checks and administration.
+              Evaluate transaction risk across six core evidence layers before money changes hands.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Card 1: Verify RC */}
-            <CardLayout
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <CapabilityCard
               icon={<Search className="h-6 w-6 text-primary" />}
-              title="Verify RC"
-              desc="Search any vehicle registration certificate instantly by entering its unique RC number."
-              btnText="Search Registry"
-              onClick={() => navigate("/verify")}
+              title="1. Vehicle Identity"
+              desc="Cross-examine registration numbers, make, model, chassis, and engine specs for physical tampering or record mismatches."
             />
-
-            {/* Card 2: Ownership Transfer */}
-            <CardLayout
-              icon={<Users className="h-6 w-6 text-primary" />}
-              title="Ownership Transfer"
-              desc="Maintain complete, cryptographically mapped logs of vehicle ownership changes."
-              btnText="Transfer Ownership"
-              onClick={() => navigate("/transfer")}
+            <CapabilityCard
+              icon={<History className="h-6 w-6 text-primary" />}
+              title="2. Ownership History"
+              desc="Verify exact owner counts and transfer dates to uncover hidden multi-owner flips or claim discrepancies."
             />
-
-            {/* Card 3: Fraud Detection */}
-            <CardLayout
-              icon={<AlertTriangle className="h-6 w-6 text-primary" />}
-              title="Fraud Detection"
-              desc="Detect suspicious behaviors, stolen flags, and inconsistency markers."
-              btnText="Run Audit"
-              onClick={() => navigate("/verify")}
+            <CapabilityCard
+              icon={<UserCheck className="h-6 w-6 text-primary" />}
+              title="3. Seller Claims"
+              desc="Compare seller-declared mileage and claims against registered system records and historical checkpoints."
             />
-
-            {/* Card 4: Analytics */}
-            <CardLayout
-              icon={<BarChart3 className="h-6 w-6 text-primary" />}
-              title="Analytics"
-              desc="Monitor regional trends, monthly registrations, and fraud statistics."
-              btnText="View Reports"
-              onClick={() => navigate("/analytics")}
+            <CapabilityCard
+              icon={<FileText className="h-6 w-6 text-primary" />}
+              title="4. Document Checks"
+              desc="Check validity status for critical compliance documents including active insurance and PUC certificates."
+            />
+            <CapabilityCard
+              icon={<Scale className="h-6 w-6 text-primary" />}
+              title="5. Risk Assessment"
+              desc="Get a transparent, explainable 0–100 Trust Score highlighting exact positive factors and risk signals."
+            />
+            <CapabilityCard
+              icon={<CheckCircle2 className="h-6 w-6 text-primary" />}
+              title="6. Buyer Action Checklist"
+              desc="Receive a tailored physical inspection checklist and negotiation points before finalizing payment."
             />
           </div>
         </div>
       </section>
 
-      {/* Why Choose Section */}
-      <section className="container mx-auto px-4 py-20 border-t">
-        <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <h2 className="text-3xl font-bold tracking-tight">Why Choose RC Verification?</h2>
-            <p className="text-muted-foreground text-sm">
-              Our application offers secure, low-latency queries backed by solid infrastructure to help departments audit vehicle histories.
+      {/* Trust & Transparency Note */}
+      <section className="container mx-auto px-4 py-16 border-t">
+        <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8 items-center">
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold tracking-tight">Evidence-Based Risk Intelligence</h2>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Drive Verify does not rely on vague black-box AI scores. Every score point is fully explainable with clear indicators for clean stolen status, active insurance, owner count alignment, or detected discrepancies.
             </p>
-            <ul className="space-y-3 text-sm">
-              <li className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-emerald-500" /> Fast Verification under 1 second</li>
-              <li className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-emerald-500" /> Proactive Fraud Flags (Stolen/Suspicious)</li>
-              <li className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-emerald-500" /> Complete Ownership History Timeline</li>
-              <li className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-emerald-500" /> Secure Admin Session Protection</li>
-              <li className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-emerald-500" /> Real-time System Metrics Integration</li>
+            <ul className="space-y-2 text-sm">
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Deterministic scoring rules</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> PII-masked public records</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-emerald-500" /> Shareable Trust Reports</li>
             </ul>
           </div>
-          <div className="bg-muted p-8 rounded-2xl border flex items-center justify-center min-h-[250px]">
-            <Shield className="h-32 w-32 text-primary/30" />
-          </div>
-        </div>
-      </section>
-
-      {/* Technology Stack */}
-      <section className="container mx-auto px-4 py-16 border-t bg-muted/10">
-        <div className="max-w-5xl mx-auto space-y-8">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold tracking-tight mb-2">Technology Stack</h2>
-            <p className="text-muted-foreground text-sm">Built with modern enterprise-grade open source tech.</p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-            <TechBadge icon={<Code className="h-5 w-5 text-primary" />} label="React" />
-            <TechBadge icon={<Server className="h-5 w-5 text-primary" />} label="Spring Boot" />
-            <TechBadge icon={<Database className="h-5 w-5 text-primary" />} label="MongoDB" />
-            <TechBadge icon={<Code className="h-5 w-5 text-primary" />} label="Tailwind" />
-            <TechBadge icon={<Server className="h-5 w-5 text-primary" />} label="Java 21" />
-            <TechBadge icon={<BarChart3 className="h-5 w-5 text-primary" />} label="Prometheus" />
+          <div className="bg-card p-6 rounded-2xl border flex flex-col justify-center space-y-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              <span className="font-semibold text-sm">Demo & Verification Notice</span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Drive Verify evaluates vehicle records stored in its secure verification database. Sample data is clearly demarcated for demonstration purposes.
+            </p>
           </div>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="border-t py-8 bg-card/30 text-center text-xs text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} Drive Verify system. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Drive Verify — Vehicle Transaction Trust & Risk Platform. All rights reserved.</p>
       </footer>
     </div>
   );
 };
 
-/* Feature card sub-component */
-const CardLayout = ({ icon, title, desc, btnText, onClick }: { icon: React.ReactNode; title: string; desc: string; btnText: string; onClick: () => void }) => {
+/* Capability Card Sub-component */
+const CapabilityCard = ({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) => {
   return (
     <div className="bg-card p-6 rounded-xl border flex flex-col justify-between hover:shadow-md transition-shadow">
       <div>
         <div className="mb-4 bg-primary/5 p-3 rounded-lg w-fit">{icon}</div>
-        <h3 className="text-lg font-semibold tracking-tight mb-2">{title}</h3>
-        <p className="text-xs text-muted-foreground leading-relaxed mb-6">{desc}</p>
+        <h3 className="text-base font-bold tracking-tight mb-2">{title}</h3>
+        <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
       </div>
-      <Button variant="outline" size="sm" className="w-full" onClick={onClick}>
-        {btnText}
-      </Button>
-    </div>
-  );
-};
-
-/* Tech badge sub-component */
-const TechBadge = ({ icon, label }: { icon: React.ReactNode; label: string }) => {
-  return (
-    <div className="bg-card border p-4 rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-muted/50 transition-colors">
-      {icon}
-      <span className="text-xs font-semibold">{label}</span>
     </div>
   );
 };

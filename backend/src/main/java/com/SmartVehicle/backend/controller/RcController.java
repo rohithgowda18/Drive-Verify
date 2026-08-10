@@ -97,11 +97,15 @@ public class RcController {
             }
         }
 
+        // Total ownership transfers across system
+        long ownershipTransfersCount = ownershipHistoryRepository.count();
+
         java.util.Map<String, Object> result = new java.util.HashMap<>();
         result.put("total", total);
         result.put("activeCount", activeCount);
         result.put("stolenCount", stolenCount);
         result.put("suspiciousCount", suspiciousCount);
+        result.put("ownershipTransfersCount", ownershipTransfersCount);
         result.put("byState", byState);
         result.put("monthlyVerifications", monthly.entrySet().stream()
                 .map(e -> java.util.Map.of("month", e.getKey(), "count", e.getValue()))

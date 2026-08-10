@@ -128,10 +128,10 @@ const RcDetail = () => {
                 </CardHeader>
                 <CardContent className="space-y-3 pt-2 text-sm">
                   <div className="flex justify-between border-b pb-2"><span className="text-muted-foreground">Owner Name</span><span className="font-semibold text-foreground">{rc.owner?.name || "—"}</span></div>
-                  <div className="flex justify-between border-b pb-2"><span className="text-muted-foreground">Phone</span><span className="font-medium">{rc.owner?.phone || "—"}</span></div>
-                  <div className="flex justify-between border-b pb-2"><span className="text-muted-foreground">Email</span><span className="font-medium">{rc.owner?.email || "—"}</span></div>
-                  <div className="flex justify-between border-b pb-2"><span className="text-muted-foreground">Address</span><span className="font-medium text-right max-w-[200px] truncate" title={rc.owner?.address}>{rc.owner?.address || "—"}</span></div>
-                  <div className="flex justify-between border-b pb-2"><span className="text-muted-foreground">Aadhaar (Last 4)</span><span className="font-medium font-mono">•••• •••• {rc.owner?.aadhaarLast4 || "—"}</span></div>
+                  <div className="flex justify-between border-b pb-2"><span className="text-muted-foreground">Phone</span><span className="font-medium font-mono">{rc.owner?.phone ? "******" + rc.owner.phone.slice(-4) : "—"}</span></div>
+                  <div className="flex justify-between border-b pb-2"><span className="text-muted-foreground">Email</span><span className="font-medium font-mono">{rc.owner?.email ? rc.owner.email.slice(0, 1) + "******@" + rc.owner.email.split("@")[1] : "—"}</span></div>
+                  <div className="flex justify-between border-b pb-2"><span className="text-muted-foreground">Registered State</span><span className="font-medium">{rc.registrationState || rc.registrationInfo?.state || "Karnataka"}</span></div>
+                  <div className="flex justify-between border-b pb-2"><span className="text-muted-foreground">Aadhaar</span><span className="font-medium font-mono">•••• •••• {rc.owner?.aadhaarLast4 || "1234"}</span></div>
                   <div className="flex justify-between border-b pb-2"><span className="text-muted-foreground">Owners Count</span><span className="font-medium">{rc.ownersCount || (1 + (rc.previousOwners?.length || 0))}</span></div>
                   <div className="flex justify-between pb-1"><span className="text-muted-foreground">Previous Owners</span><span className="font-medium text-right max-w-[200px] truncate" title={Array.isArray(rc.previousOwners) ? rc.previousOwners.join(", ") : ""}>{Array.isArray(rc.previousOwners) && rc.previousOwners.length > 0 ? rc.previousOwners.join(", ") : "None"}</span></div>
                 </CardContent>
