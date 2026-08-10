@@ -59,6 +59,18 @@ public class RcController {
         return rcService.searchByRcNumber(rcNumber);
     }
 
+    @Autowired
+    private com.SmartVehicle.backend.service.RiskAssessmentService riskAssessmentService;
+
+    @PostMapping("/evaluate")
+    public com.SmartVehicle.backend.model.RiskAssessment evaluateVehicle(@RequestBody com.SmartVehicle.backend.model.Rc requestPayload) {
+        if (requestPayload.getRcNumber() == null || requestPayload.getRcNumber().isBlank()) {
+            throw new IllegalArgumentException("rcNumber is required");
+        }
+        Rc rc = rcService.searchByRcNumber(requestPayload.getRcNumber().trim());
+        return riskAssessmentService.evaluate(rc, requestPayload.getSellerClaim(), null);
+    }
+
     @GetMapping("/stats")
     public java.util.Map<String, Object> getStats() {
         List<Rc> all = rcService.getAll();

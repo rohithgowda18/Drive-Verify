@@ -54,12 +54,12 @@ const Verify = () => {
         },
       };
 
-      const verificationRes = await apiClient.verifications.create(reqPayload);
+      const assessment = await apiClient.verifications.create(reqPayload);
       const rc = await apiClient.rc.search(rcNumber.trim());
 
       setResult({
         rc,
-        assessment: verificationRes.riskAssessment,
+        assessment,
       });
 
       toast.success("Risk Assessment generated");

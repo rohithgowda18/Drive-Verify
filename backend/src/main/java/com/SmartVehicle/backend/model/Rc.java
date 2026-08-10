@@ -88,6 +88,15 @@ public class Rc {
     public Integer getVerified() { return verified; }
     public void setVerified(Integer verified) { this.verified = verified; }
 
+    private SellerClaim sellerClaim;
+    private RiskAssessment riskAssessment;
+
+    public SellerClaim getSellerClaim() { return sellerClaim; }
+    public void setSellerClaim(SellerClaim sellerClaim) { this.sellerClaim = sellerClaim; }
+
+    public RiskAssessment getRiskAssessment() { return riskAssessment; }
+    public void setRiskAssessment(RiskAssessment riskAssessment) { this.riskAssessment = riskAssessment; }
+
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 

@@ -123,8 +123,8 @@ export const apiClient = {
     },
   },
   verifications: {
-    create: async (data: { rcNumber: string; requesterEmail?: string; requestType?: string; sellerClaim?: any; evidences?: any[] }) => {
-      const response = await fetch(`${API_BASE_URL}/api/verifications`, {
+    create: async (data: { rcNumber: string; sellerClaim?: any }) => {
+      const response = await fetch(`${API_BASE_URL}/api/rc/evaluate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

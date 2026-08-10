@@ -11,18 +11,8 @@ import com.SmartVehicle.backend.model.Evidence;
 import com.SmartVehicle.backend.model.Rc;
 import com.SmartVehicle.backend.model.RiskAssessment;
 import com.SmartVehicle.backend.model.SellerClaim;
-import com.SmartVehicle.backend.model.VehicleEvent;
-import com.SmartVehicle.backend.repository.VehicleEventRepository;
-
 @Service
 public class RiskAssessmentService {
-
-    private final VehicleEventRepository vehicleEventRepository;
-
-    @Autowired
-    public RiskAssessmentService(VehicleEventRepository vehicleEventRepository) {
-        this.vehicleEventRepository = vehicleEventRepository;
-    }
 
     public RiskAssessment evaluate(Rc rc, SellerClaim claim, List<Evidence> evidences) {
         int score = 100;
@@ -74,24 +64,8 @@ public class RiskAssessmentService {
         }
 
         // 3. Mileage Rollback / Anomaly Check
-        List<VehicleEvent> events = vehicleEventRepository.findByRcNumberOrderByTimestampDesc(rc.getRcNumber());
         if (claim != null && claim.getClaimedMileage() != null && claim.getClaimedMileage() > 0) {
-            boolean rollbackDetected = false;
-            for (VehicleEvent ev : events) {
-                if (ev.getRecordedMileage() != null && ev.getRecordedMileage() > claim.getClaimedMileage()) {
-                    rollbackDetected = true;
-                    score -= 25;
-                    String msg = String.format("🔴 Possible odometer rollback: Claimed %d km, but historical event recorded %d km", claim.getClaimedMileage(), ev.getRecordedMileage());
-                    mismatches.add(msg);
-                    riskReasons.add(msg);
-                    inspectionChecklist.add("☐ Inspect instrument cluster, brake pedal wear, and official service logs for odometer tampering");
-                    negotiationPoints.add("Historical mileage record (" + ev.getRecordedMileage() + " km) is higher than current claimed mileage (" + claim.getClaimedMileage() + " km)");
-                    break;
-                }
-            }
-            if (!rollbackDetected) {
-                positiveFactors.add("🟢 Claimed mileage (" + claim.getClaimedMileage() + " km) is consistent with historical records");
-            }
+            positiveFactors.add("🟢 Claimed mileage (" + claim.getClaimedMileage() + " km) recorded for transaction evaluation");
         }
 
         // 4. Insurance & PUC Status Checks

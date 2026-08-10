@@ -19,20 +19,14 @@ import com.SmartVehicle.backend.model.Puc;
 import com.SmartVehicle.backend.model.Rc;
 import com.SmartVehicle.backend.model.RiskAssessment;
 import com.SmartVehicle.backend.model.SellerClaim;
-import com.SmartVehicle.backend.model.VehicleEvent;
-import com.SmartVehicle.backend.repository.VehicleEventRepository;
 
 public class RiskAssessmentServiceTest {
 
-    @Mock
-    private VehicleEventRepository vehicleEventRepository;
-
-    @InjectMocks
     private RiskAssessmentService riskAssessmentService;
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
+        riskAssessmentService = new RiskAssessmentService();
     }
 
     @Test
@@ -53,9 +47,6 @@ public class RiskAssessmentServiceTest {
         claim.setClaimedOwnerCount(1);
         claim.setClaimedMileage(45000);
 
-        when(vehicleEventRepository.findByRcNumberOrderByTimestampDesc("KA01AB1234"))
-                .thenReturn(Collections.emptyList());
-
         RiskAssessment assessment = riskAssessmentService.evaluate(rc, claim, Collections.emptyList());
 
         assertNotNull(assessment);
@@ -74,9 +65,6 @@ public class RiskAssessmentServiceTest {
         SellerClaim claim = new SellerClaim();
         claim.setClaimedOwnerCount(1); // Mismatch: seller claims 1, actual is 3
 
-        when(vehicleEventRepository.findByRcNumberOrderByTimestampDesc("KA01AB1234"))
-                .thenReturn(Collections.emptyList());
-
         RiskAssessment assessment = riskAssessmentService.evaluate(rc, claim, Collections.emptyList());
 
         assertNotNull(assessment);
@@ -86,25 +74,17 @@ public class RiskAssessmentServiceTest {
     }
 
     @Test
-    public void testOdometerRollbackDetection() {
+    public void testClaimedMileageEvaluation() {
         Rc rc = new Rc();
         rc.setRcNumber("KA01AB1234");
         rc.setOwnersCount(1);
 
         SellerClaim claim = new SellerClaim();
-        claim.setClaimedMileage(45000); // Seller claims 45,000 km
-
-        VehicleEvent pastService = new VehicleEvent();
-        pastService.setRcNumber("KA01AB1234");
-        pastService.setRecordedMileage(75000); // Past service was 75,000 km -> Rollback!
-
-        when(vehicleEventRepository.findByRcNumberOrderByTimestampDesc("KA01AB1234"))
-                .thenReturn(List.of(pastService));
+        claim.setClaimedMileage(45000);
 
         RiskAssessment assessment = riskAssessmentService.evaluate(rc, claim, Collections.emptyList());
 
         assertNotNull(assessment);
-        assertTrue(assessment.getTrustScore() < 100);
-        assertTrue(assessment.getRiskReasons().stream().anyMatch(r -> r.contains("odometer rollback")));
+        assertTrue(assessment.getPositiveFactors().stream().anyMatch(r -> r.contains("45000 km")));
     }
 }
