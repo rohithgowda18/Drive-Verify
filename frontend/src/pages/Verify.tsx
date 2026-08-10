@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Shield, ArrowLeft, Search, CheckCircle2, AlertTriangle, FileText, Check, X, Scale } from "lucide-react";
+import { Shield, ArrowLeft, Search, CheckCircle2, AlertTriangle, FileText, Check, X, Scale, History } from "lucide-react";
 import { toast } from "sonner";
 import { apiClient } from "@/lib/api";
 
@@ -256,6 +256,20 @@ const Verify = () => {
                     </ul>
                   </div>
                 )}
+
+                {/* Quick Actions */}
+                <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+                  {result.rc?.id && (
+                    <Button variant="outline" className="flex-1" onClick={() => navigate(`/rc/${result.rc.id}/history`)}>
+                      <History className="h-4 w-4 mr-2" /> View Ownership Timeline
+                    </Button>
+                  )}
+                  {result.rc?.id && (
+                    <Button variant="secondary" className="flex-1" onClick={() => navigate(`/rc/${result.rc.id}`)}>
+                      <FileText className="h-4 w-4 mr-2" /> View Detailed Vehicle Record
+                    </Button>
+                  )}
+                </div>
 
                 {/* Disclaimer */}
                 <p className="text-[11px] text-muted-foreground italic text-center border-t pt-4">
