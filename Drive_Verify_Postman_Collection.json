@@ -22,7 +22,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"rcNumber\": \"KA01AB1234\",\n  \"sellerClaim\": {\n    \"claimedOwnerCount\": 1,\n    \"claimedMileage\": 48000\n  }\n}"
+              "raw": "{\n  \"rcNumber\": \"KA01AB1234\",\n  \"sellerClaim\": {\n    \"claimedOwnerCount\": 1\n  }\n}"
             },
             "url": {
               "raw": "http://localhost:8080/api/rc/evaluate",

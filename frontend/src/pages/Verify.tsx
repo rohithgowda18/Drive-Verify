@@ -30,7 +30,6 @@ const Verify = () => {
   const navigate = useNavigate();
   const [rcNumber, setRcNumber] = useState("");
   const [claimedOwners, setClaimedOwners] = useState("");
-  const [claimedMileage, setClaimedMileage] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VerificationData | null>(null);
 
@@ -50,7 +49,6 @@ const Verify = () => {
         requestType: "BUYER",
         sellerClaim: {
           claimedOwnerCount: claimedOwners ? parseInt(claimedOwners) : undefined,
-          claimedMileage: claimedMileage ? parseInt(claimedMileage) : undefined,
         },
       };
 
@@ -146,7 +144,7 @@ const Verify = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="rc-number">RC Registration Number *</Label>
                 <Input
@@ -166,17 +164,6 @@ const Verify = () => {
                   placeholder="e.g. 1"
                   value={claimedOwners}
                   onChange={(e) => setClaimedOwners(e.target.value)}
-                  disabled={loading}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="claimed-mileage">Seller Claimed Mileage (km)</Label>
-                <Input
-                  id="claimed-mileage"
-                  type="number"
-                  placeholder="e.g. 45000"
-                  value={claimedMileage}
-                  onChange={(e) => setClaimedMileage(e.target.value)}
                   disabled={loading}
                 />
               </div>

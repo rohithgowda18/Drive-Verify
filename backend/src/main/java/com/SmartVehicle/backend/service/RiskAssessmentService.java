@@ -63,12 +63,7 @@ public class RiskAssessmentService {
             }
         }
 
-        // 3. Mileage Rollback / Anomaly Check
-        if (claim != null && claim.getClaimedMileage() != null && claim.getClaimedMileage() > 0) {
-            positiveFactors.add("🟢 Claimed mileage (" + claim.getClaimedMileage() + " km) recorded for transaction evaluation");
-        }
-
-        // 4. Insurance & PUC Status Checks
+        // 3. Insurance & PUC Status Checks
         if (rc.getInsurance() != null && rc.getInsurance().getValidTill() != null) {
             positiveFactors.add("🟢 Active insurance policy found (" + rc.getInsurance().getProvider() + ")");
         } else {

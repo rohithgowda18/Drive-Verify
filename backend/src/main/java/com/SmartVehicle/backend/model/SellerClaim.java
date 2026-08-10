@@ -14,9 +14,6 @@ public class SellerClaim {
     public Integer getClaimedOwnerCount() { return claimedOwnerCount; }
     public void setClaimedOwnerCount(Integer claimedOwnerCount) { this.claimedOwnerCount = claimedOwnerCount; }
 
-    public Integer getClaimedMileage() { return claimedMileage; }
-    public void setClaimedMileage(Integer claimedMileage) { this.claimedMileage = claimedMileage; }
-
     public Boolean getClaimedAccidentFree() { return claimedAccidentFree; }
     public void setClaimedAccidentFree(Boolean claimedAccidentFree) { this.claimedAccidentFree = claimedAccidentFree; }
 
