@@ -34,17 +34,10 @@ const Dashboard = () => {
             <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
               Home
             </Button>
-            {isAdmin ? (
-              <Button variant="destructive" size="sm" onClick={handleLogout}>
-                <LogOut className="h-4 w-4 mr-1.5" />
-                End Admin Session
-              </Button>
-            ) : (
-              <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
-                <Key className="h-4 w-4 mr-1.5" />
-                Admin Session
-              </Button>
-            )}
+            <Button variant="destructive" size="sm" onClick={handleLogout}>
+              <LogOut className="h-4 w-4 mr-1.5" />
+              Sign Out
+            </Button>
           </div>
         </div>
       </header>
