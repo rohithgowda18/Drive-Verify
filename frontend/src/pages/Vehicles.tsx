@@ -25,8 +25,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 
+import { auth } from "@/lib/auth";
+
 const Vehicles = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!auth.isAuthenticated()) {
+      toast.error("Admin authentication required");
+      navigate("/admin/login");
+    }
+  }, [navigate]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
   const [size] = useState(10);

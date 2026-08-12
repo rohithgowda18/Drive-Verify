@@ -19,10 +19,19 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 
+import { auth } from "@/lib/auth";
+
 type Owner = { name: string; email?: string; phone?: string; address?: string; aadhaarLast4?: string };
 
 const TransferOwnership = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!auth.isAuthenticated()) {
+      toast.error("Admin authentication required");
+      navigate("/admin/login");
+    }
+  }, [navigate]);
   const adminKey = localStorage.getItem("adminKey") || "";
   const [rcNumber, setRcNumber] = useState("");
   const [currentOwner, setCurrentOwner] = useState<Owner | null>(null);

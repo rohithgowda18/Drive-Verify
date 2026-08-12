@@ -7,6 +7,8 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, PieChart, Pie, Cell, Legend } from "recharts";
 import { toast } from "sonner";
 
+import { auth } from "@/lib/auth";
+
 const COLORS = ["#ef4444", "#eab308", "#10b981"]; // Red (Stolen), Yellow (Suspicious), Green (Clean)
 
 const Analytics = () => {
@@ -14,10 +16,23 @@ const Analytics = () => {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<any>(null);
 
+  useEffect(() => {
+    if (!auth.isAuthenticated()) {
+      toast.error("Admin authentication required");
+      navigate("/admin/login");
+    }
+  }, [navigate]);
+
   const load = async () => {
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:8080/api/rc/stats");
+      const token = auth.getToken();
+      const res = await fetch("http://localhost:8080/api/rc/stats", {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": token ? `Bearer ${token}` : "",
+        },
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setStats(data);

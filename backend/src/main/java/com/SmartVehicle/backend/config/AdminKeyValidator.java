@@ -16,6 +16,13 @@ public class AdminKeyValidator {
         if (headerKey == null || headerKey.isBlank()) {
             headerKey = request.getHeader("X-ADMIN-KEY");
         }
-        return headerKey != null && headerKey.equals(adminSecretKey);
+        if (headerKey != null && headerKey.equals(adminSecretKey)) {
+            return true;
+        }
+        String token = request.getHeader("Authorization");
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+        return com.SmartVehicle.backend.controller.AuthController.isValidSessionToken(token);
     }
 }

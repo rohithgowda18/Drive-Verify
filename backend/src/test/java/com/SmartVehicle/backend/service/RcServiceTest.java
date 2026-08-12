@@ -15,9 +15,7 @@ import org.mockito.MockitoAnnotations;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 
-import com.SmartVehicle.backend.model.Owner;
 import com.SmartVehicle.backend.model.Rc;
-import com.SmartVehicle.backend.model.VehicleInfo;
 import com.SmartVehicle.backend.repository.OwnershipHistoryRepository;
 import com.SmartVehicle.backend.repository.RcRepository;
 

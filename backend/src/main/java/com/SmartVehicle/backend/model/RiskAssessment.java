@@ -4,8 +4,8 @@ import java.time.Instant;
 import java.util.List;
 
 public class RiskAssessment {
-    private int trustScore; // 0 to 100
-    private String riskLevel; // LOW, MEDIUM, HIGH
+    private int trustScore;
+    private String riskLevel;
     private List<String> mismatches;
     private List<String> riskReasons;
     private List<String> positiveFactors;

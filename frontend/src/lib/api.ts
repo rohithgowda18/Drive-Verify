@@ -1,12 +1,17 @@
-// API client for Spring Boot backend
+import { auth } from "./auth";
+
 export const API_BASE_URL = "http://localhost:8080";
 
 async function handleResponse(response: Response) {
   const text = await response.text();
   
   if (!response.ok) {
-    const errorMsg = text || `HTTP Error: ${response.status}`;
-    throw new Error(errorMsg);
+    let msg = text;
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed.error) msg = parsed.error;
+    } catch {}
+    throw new Error(msg || `HTTP Error: ${response.status}`);
   }
   
   try {
@@ -16,15 +21,25 @@ async function handleResponse(response: Response) {
   }
 }
 
+function getAuthHeaders(): Record<string, string> {
+  const token = auth.getToken();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
 export const apiClient = {
   baseUrl: API_BASE_URL,
-  // Placeholder auth methods (backend auth not present in this module)
   auth: {
-    signUp: async (_email: string, _password: string, _fullName: string) => {
-      throw new Error("Auth API not implemented in backend");
-    },
-    signIn: async (_email: string, _password: string) => {
-      throw new Error("Auth API not implemented in backend");
+    adminLogin: async (adminKey: string) => {
+      const response = await fetch(`${API_BASE_URL}/api/auth/admin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ adminKey }),
+      });
+      return handleResponse(response);
     },
   },
   rc: {
@@ -34,7 +49,7 @@ export const apiClient = {
         `${API_BASE_URL}/api/rc/search?rcNumber=${encodeURIComponent(rcNumber)}`,
         {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders(),
         }
       );
       return handleResponse(response);
@@ -43,7 +58,7 @@ export const apiClient = {
     getAll: async () => {
       const response = await fetch(`${API_BASE_URL}/api/rc`, {
         method: "GET",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
       });
       return handleResponse(response);
     },
@@ -61,63 +76,50 @@ export const apiClient = {
       if (params.ownerName) q.set("ownerName", params.ownerName);
       const response = await fetch(`${API_BASE_URL}/api/rc/page?${q.toString()}`, {
         method: "GET",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
       });
       return handleResponse(response);
     },
 
     getById: async (id: string) => {
-      const response = await fetch(`${API_BASE_URL}/api/rc/${id}`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/api/rc/${id}`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+      });
       return handleResponse(response);
     },
 
     getHistory: async (id: string) => {
       const response = await fetch(`${API_BASE_URL}/api/rc/${id}/history`, {
         method: "GET",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        headers: getAuthHeaders(),
       });
       return handleResponse(response);
     },
 
-    // Admin-only endpoints (automatically read X-ADMIN-KEY from localStorage)
+    // Admin-only endpoints
     create: async (rc: any) => {
-      const adminKey = localStorage.getItem("adminKey") || "";
       const response = await fetch(`${API_BASE_URL}/api/rc`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-ADMIN-KEY": adminKey,
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(rc),
       });
       return handleResponse(response);
     },
 
     update: async (id: string, rc: any) => {
-      const adminKey = localStorage.getItem("adminKey") || "";
       const response = await fetch(`${API_BASE_URL}/api/rc/${id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "X-ADMIN-KEY": adminKey,
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(rc),
       });
       return handleResponse(response);
     },
 
     remove: async (id: string) => {
-      const adminKey = localStorage.getItem("adminKey") || "";
       const response = await fetch(`${API_BASE_URL}/api/rc/${id}`, {
         method: "DELETE",
-        headers: {
-          "X-ADMIN-KEY": adminKey,
-        },
+        headers: getAuthHeaders(),
       });
       return handleResponse(response);
     },

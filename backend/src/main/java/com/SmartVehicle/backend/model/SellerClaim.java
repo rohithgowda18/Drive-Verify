@@ -1,10 +1,7 @@
 package com.SmartVehicle.backend.model;
 
-import java.util.List;
-
 public class SellerClaim {
     private Integer claimedOwnerCount;
-    private Integer claimedMileage;
     private Boolean claimedAccidentFree;
     private Boolean claimedOriginalEngine;
     private Boolean claimedOriginalChassis;

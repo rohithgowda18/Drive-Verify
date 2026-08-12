@@ -17,41 +17,52 @@ import org.springframework.web.bind.annotation.RestController;
 import com.SmartVehicle.backend.config.AdminKeyValidator;
 import com.SmartVehicle.backend.exception.UnauthorizedException;
 import com.SmartVehicle.backend.model.Rc;
-import com.SmartVehicle.backend.service.RcService;
-import com.SmartVehicle.backend.repository.OwnershipHistoryRepository;
 import com.SmartVehicle.backend.model.OwnershipHistory;
 import com.SmartVehicle.backend.model.SellerClaim;
 import com.SmartVehicle.backend.model.RiskAssessment;
+import com.SmartVehicle.backend.service.RcService;
 import com.SmartVehicle.backend.service.RiskAssessmentService;
+import com.SmartVehicle.backend.repository.OwnershipHistoryRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/rc")
-@CrossOrigin(origins = "*", allowedHeaders = "*", methods = {org.springframework.web.bind.annotation.RequestMethod.GET, org.springframework.web.bind.annotation.RequestMethod.POST, org.springframework.web.bind.annotation.RequestMethod.PUT, org.springframework.web.bind.annotation.RequestMethod.DELETE, org.springframework.web.bind.annotation.RequestMethod.OPTIONS})
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class RcController {
 
     private final RcService rcService;
     private final AdminKeyValidator adminKeyValidator;
     private final OwnershipHistoryRepository ownershipHistoryRepository;
-    private final org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
+    private final RiskAssessmentService riskAssessmentService;
 
     @Autowired
-    public RcController(RcService rcService, AdminKeyValidator adminKeyValidator, OwnershipHistoryRepository ownershipHistoryRepository, org.springframework.data.mongodb.core.MongoTemplate mongoTemplate) {
+    public RcController(RcService rcService, AdminKeyValidator adminKeyValidator, OwnershipHistoryRepository ownershipHistoryRepository, RiskAssessmentService riskAssessmentService) {
         this.rcService = rcService;
         this.adminKeyValidator = adminKeyValidator;
         this.ownershipHistoryRepository = ownershipHistoryRepository;
-        this.mongoTemplate = mongoTemplate;
+        this.riskAssessmentService = riskAssessmentService;
     }
 
     @GetMapping
-    public List<Rc> getAll() {
-        return rcService.getAll();
+    public List<Rc> getAll(HttpServletRequest request) {
+        List<Rc> all = rcService.getAll();
+        if (!adminKeyValidator.isAdminAuthorized(request)) {
+            all.forEach(this::maskPii);
+        }
+        return all;
     }
 
     @GetMapping("/{id}")
-    public Rc getById(@PathVariable String id) {
-        return rcService.getById(id);
+    public Rc getById(@PathVariable String id, HttpServletRequest request) {
+        Rc rc = rcService.getById(id);
+        if (rc == null) {
+            throw new com.SmartVehicle.backend.exception.RcNotFoundException("Vehicle not found with ID: " + id);
+        }
+        if (!adminKeyValidator.isAdminAuthorized(request)) {
+            maskPii(rc);
+        }
+        return rc;
     }
 
     @GetMapping("/{id}/history")
@@ -60,12 +71,16 @@ public class RcController {
     }
 
     @GetMapping("/search")
-    public Rc searchByRcNumber(@RequestParam String rcNumber) {
-        return rcService.searchByRcNumber(rcNumber);
+    public Rc searchByRcNumber(@RequestParam String rcNumber, HttpServletRequest request) {
+        Rc found = rcService.searchByRcNumber(rcNumber);
+        if (found == null) {
+            throw new com.SmartVehicle.backend.exception.RcNotFoundException("Vehicle not found with RC Number: " + rcNumber);
+        }
+        if (!adminKeyValidator.isAdminAuthorized(request)) {
+            maskPii(found);
+        }
+        return found;
     }
-
-    @Autowired
-    private RiskAssessmentService riskAssessmentService;
 
     @PostMapping("/evaluate")
     public RiskAssessment evaluateVehicle(@RequestBody Rc requestPayload) {
@@ -83,7 +98,10 @@ public class RcController {
     }
 
     @GetMapping("/stats")
-    public java.util.Map<String, Object> getStats() {
+    public java.util.Map<String, Object> getStats(HttpServletRequest request) {
+        if (!adminKeyValidator.isAdminAuthorized(request)) {
+            throw new UnauthorizedException();
+        }
         List<Rc> all = rcService.getAll();
         long total = all.size();
         long activeCount = all.stream().filter(rc -> rc.getRegistrationInfo() != null && rc.getRegistrationInfo().isActive()).count();
@@ -98,7 +116,6 @@ public class RcController {
             }
         }
 
-        // Monthly verifications (by Rc.createdAt month)
         java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM");
         java.util.Map<String, Integer> monthly = new java.util.TreeMap<>();
         for (Rc rc : all) {
@@ -108,7 +125,6 @@ public class RcController {
             }
         }
 
-        // Total ownership transfers across system
         long ownershipTransfersCount = ownershipHistoryRepository.count();
 
         java.util.Map<String, Object> result = new java.util.HashMap<>();
@@ -132,7 +148,8 @@ public class RcController {
             @RequestParam(required = false) Boolean stolen,
             @RequestParam(required = false) Boolean suspicious,
             @RequestParam(required = false) String make,
-            @RequestParam(required = false) String ownerName) {
+            @RequestParam(required = false) String ownerName,
+            HttpServletRequest request) {
 
         if (page < 0) page = 0;
         if (size < 1) size = 10;
@@ -141,6 +158,9 @@ public class RcController {
         int from = Math.min(page * size, total);
         int to = Math.min(from + size, total);
         List<Rc> slice = filtered.subList(from, to);
+        if (!adminKeyValidator.isAdminAuthorized(request)) {
+            slice.forEach(this::maskPii);
+        }
         int totalPages = (int) Math.ceil(total / (double) size);
 
         java.util.Map<String, Object> result = new java.util.HashMap<>();
@@ -168,5 +188,22 @@ public class RcController {
     public void delete(@PathVariable String id, HttpServletRequest request) {
         if (!adminKeyValidator.isAdminAuthorized(request)) throw new UnauthorizedException();
         rcService.delete(id);
+    }
+
+    private void maskPii(Rc rc) {
+        if (rc == null) return;
+        if (rc.getChassisNumber() != null && rc.getChassisNumber().length() > 4) {
+            rc.setChassisNumber("****" + rc.getChassisNumber().substring(rc.getChassisNumber().length() - 4));
+        }
+        if (rc.getEngineNumber() != null && rc.getEngineNumber().length() > 4) {
+            rc.setEngineNumber("****" + rc.getEngineNumber().substring(rc.getEngineNumber().length() - 4));
+        }
+        if (rc.getOwner() != null) {
+            Rc.Owner o = rc.getOwner();
+            if (o.getPhone() != null) o.setPhone("******" + (o.getPhone().length() >= 4 ? o.getPhone().substring(o.getPhone().length() - 4) : ""));
+            if (o.getEmail() != null) o.setEmail("masked@privacy.internal");
+            if (o.getAddress() != null) o.setAddress("Protected PII Address");
+            if (o.getAadhaarLast4() != null) o.setAadhaarLast4("****");
+        }
     }
 }

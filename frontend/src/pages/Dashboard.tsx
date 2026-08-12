@@ -1,19 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, QrCode, Database, BarChart3, Users, LogOut, Key } from "lucide-react";
+import { Shield, QrCode, Database, BarChart3, Users, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { auth } from "@/lib/auth";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState(!!localStorage.getItem("adminKey"));
+
+  useEffect(() => {
+    if (!auth.isAuthenticated()) {
+      toast.error("Please login with Admin Secret Key");
+      navigate("/admin/login");
+    }
+  }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem("adminKey");
-    setIsAdmin(false);
-    toast.success("Admin Session Ended");
+    auth.clearToken();
+    toast.success("Admin session logged out");
+    navigate("/admin/login");
   };
 
   return (

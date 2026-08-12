@@ -3,19 +3,10 @@ package com.SmartVehicle.backend.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
-import com.SmartVehicle.backend.model.Insurance;
-import com.SmartVehicle.backend.model.Puc;
 import com.SmartVehicle.backend.model.Rc;
 import com.SmartVehicle.backend.model.RiskAssessment;
 import com.SmartVehicle.backend.model.SellerClaim;
@@ -36,10 +27,10 @@ public class RiskAssessmentServiceTest {
         rc.setOwnersCount(1);
         rc.setStolen(false);
         rc.setSuspicious(false);
-        Insurance ins = new Insurance();
+        Rc.Insurance ins = new Rc.Insurance();
         ins.setValidTill("2030-01-01");
         rc.setInsurance(ins);
-        Puc puc = new Puc();
+        Rc.Puc puc = new Rc.Puc();
         puc.setValidTill("2030-01-01");
         rc.setPuc(puc);
 
