@@ -16,35 +16,16 @@ import com.SmartVehicle.backend.model.Rc;
 import com.SmartVehicle.backend.repository.OwnershipHistoryRepository;
 import com.SmartVehicle.backend.repository.RcRepository;
 
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class RcServiceImpl implements RcService {
 
     private final RcRepository repo;
     private final OwnershipHistoryRepository ownershipHistoryRepository;
     private final EmailService emailService;
     private final MongoTemplate mongoTemplate;
-    private final MeterRegistry meterRegistry;
-
-    private Counter rcCreateCounter;
-    private Counter rcUpdateCounter;
-    private Counter rcDeleteCounter;
-    private Counter rcSearchCounter;
-
-    public RcServiceImpl(RcRepository repo, OwnershipHistoryRepository ownershipHistoryRepository, MeterRegistry meterRegistry, EmailService emailService, MongoTemplate mongoTemplate) {
-        this.repo = repo;
-        this.ownershipHistoryRepository = ownershipHistoryRepository;
-        this.meterRegistry = meterRegistry;
-        this.emailService = emailService;
-        this.mongoTemplate = mongoTemplate;
-        this.rcCreateCounter = meterRegistry.counter("rc_operations_total", "operation", "create");
-        this.rcUpdateCounter = meterRegistry.counter("rc_operations_total", "operation", "update");
-        this.rcDeleteCounter = meterRegistry.counter("rc_operations_total", "operation", "delete");
-        this.rcSearchCounter = meterRegistry.counter("rc_operations_total", "operation", "search");
-    }
 
     @Override
     public List<Rc> getAll() {
@@ -59,7 +40,6 @@ public class RcServiceImpl implements RcService {
     @Override
     public Rc searchByRcNumber(String rcNumber) {
         Rc found = repo.findByRcNumber(rcNumber);
-        rcSearchCounter.increment();
         if (found != null) {
             Query query = new Query(Criteria.where("rcNumber").is(rcNumber));
             Update update = new Update()
@@ -79,7 +59,6 @@ public class RcServiceImpl implements RcService {
         rc.setCreatedAt(Instant.now());
         rc.setUpdatedAt(Instant.now());
         Rc saved = repo.save(rc);
-        rcCreateCounter.increment();
         if (saved.getOwner() != null && saved.getOwner().getEmail() != null) {
             emailService.sendRcCreatedEmail(
                     saved.getOwner().getEmail(),
@@ -101,7 +80,6 @@ public class RcServiceImpl implements RcService {
         normalizeAndEnsureConsistency(rc);
         rc.setUpdatedAt(Instant.now());
         Rc saved = repo.save(rc);
-        rcUpdateCounter.increment();
         // Record ownership change if owner name differs
         if (existing.getOwner() != null && rc.getOwner() != null) {
             String oldName = existing.getOwner().getName();
@@ -131,7 +109,6 @@ public class RcServiceImpl implements RcService {
     @Override
     public void delete(String id) {
         repo.deleteById(id);
-        rcDeleteCounter.increment();
     }
 
     @Override

@@ -1,19 +1,16 @@
 package com.SmartVehicle.backend.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 import java.util.Optional;
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 import com.SmartVehicle.backend.model.Rc;
 import com.SmartVehicle.backend.repository.OwnershipHistoryRepository;
@@ -28,24 +25,17 @@ public class RcServiceTest {
     private OwnershipHistoryRepository ownershipHistoryRepository;
 
     @Mock
-    private MeterRegistry meterRegistry;
-
-    @Mock
-    private Counter counter;
-
-    @Mock
     private EmailService emailService;
 
     @Mock
-    private org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
+    private MongoTemplate mongoTemplate;
 
     private RcServiceImpl rcService;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        when(meterRegistry.counter(anyString(), any(String[].class))).thenReturn(counter);
-        rcService = new RcServiceImpl(rcRepository, ownershipHistoryRepository, meterRegistry, emailService, mongoTemplate);
+        rcService = new RcServiceImpl(rcRepository, ownershipHistoryRepository, emailService, mongoTemplate);
     }
 
     @Test
