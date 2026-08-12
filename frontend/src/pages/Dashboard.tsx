@@ -76,7 +76,7 @@ const Dashboard = () => {
               <CardHeader>
                 <CardTitle>RC Verification</CardTitle>
                 <CardDescription>
-                  Scan QR code or enter RC number to verify vehicle registration
+                  Enter RC registration number to evaluate trust score & risk factors
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -84,7 +84,7 @@ const Dashboard = () => {
                   <Button
                     className="w-full"
                     size="lg"
-                    onClick={() => navigate("/verify")}
+                    onClick={() => navigate("/customer/verify")}
                   >
                     <QrCode className="h-5 w-5 mr-2" />
                     Start Verification
@@ -101,7 +101,7 @@ const Dashboard = () => {
                 <CardDescription>View and manage registered vehicles</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button onClick={() => navigate("/vehicles")}>
+                <Button onClick={() => navigate("/admin/vehicles")}>
                   View All Vehicles
                 </Button>
               </CardContent>
@@ -115,7 +115,7 @@ const Dashboard = () => {
                 <CardDescription>View fraud detection statistics and trends</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button onClick={() => navigate("/analytics")}>
+                <Button onClick={() => navigate("/admin/analytics")}>
                   View Analytics Dashboard
                 </Button>
               </CardContent>
@@ -126,11 +126,17 @@ const Dashboard = () => {
             <Card className="shadow-card">
               <CardHeader>
                 <CardTitle>User Management</CardTitle>
-                <CardDescription>Manage user roles and permissions</CardDescription>
+                <CardDescription>System Access & User Roles</CardDescription>
               </CardHeader>
-              <CardContent>
-                <Button onClick={() => navigate("/admin/users")}>
-                  Manage Users
+              <CardContent className="space-y-3">
+                <div className="bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 p-4 rounded-lg text-sm flex items-center gap-3">
+                  <Users className="h-5 w-5 flex-shrink-0" />
+                  <span>
+                    <strong>Feature Notice:</strong> User management and RBAC system is not implemented right now. Admin access is controlled via System Secret Key authentication.
+                  </span>
+                </div>
+                <Button disabled variant="outline">
+                  User Management Unavailable
                 </Button>
               </CardContent>
             </Card>
