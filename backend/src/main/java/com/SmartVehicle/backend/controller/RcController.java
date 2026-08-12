@@ -207,7 +207,11 @@ public class RcController {
         if (rc == null) return null;
         List<OwnershipHistory> history = ownershipHistoryRepository.findByRcIdOrderByTransferredAtDesc(rc.getId());
         int ownersCount = 1 + history.size();
-        List<String> previousOwners = history.stream().map(OwnershipHistory::getPreviousOwnerName).filter(n -> n != null && !n.isBlank()).toList();
+        List<String> previousOwners = history.stream()
+                .map(OwnershipHistory::getPreviousOwnerName)
+                .filter(n -> n != null && !n.isBlank())
+                .toList()
+                .reversed();
         return RcResponse.fromEntity(rc, isAdmin, ownersCount, previousOwners);
     }
 }
