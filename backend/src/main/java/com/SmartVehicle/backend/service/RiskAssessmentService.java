@@ -13,7 +13,7 @@ import com.SmartVehicle.backend.model.SellerClaim;
 @Service
 public class RiskAssessmentService {
 
-    public RiskAssessment evaluate(Rc rc, SellerClaim claim) {
+    public RiskAssessment evaluate(Rc rc, SellerClaim claim, int actualOwners) {
         int score = 100;
         List<String> mismatches = new ArrayList<>();
         List<String> riskReasons = new ArrayList<>();
@@ -49,7 +49,6 @@ public class RiskAssessmentService {
 
         // 2. Owner Count Verification & Mismatch Detection
         if (claim != null && claim.getClaimedOwnerCount() != null) {
-            int actualOwners = rc.getOwnersCount() > 0 ? rc.getOwnersCount() : (1 + (rc.getPreviousOwners() != null ? rc.getPreviousOwners().size() : 0));
             if (!claim.getClaimedOwnerCount().equals(actualOwners)) {
                 score -= 15;
                 String msg = String.format("🔴 Owner count mismatch: Seller claims %d owner(s), but evidence shows %d owner(s)", claim.getClaimedOwnerCount(), actualOwners);
@@ -93,5 +92,9 @@ public class RiskAssessmentService {
         assessment.setGeneratedAt(Instant.now());
 
         return assessment;
+    }
+
+    public RiskAssessment evaluate(Rc rc, SellerClaim claim) {
+        return evaluate(rc, claim, 1);
     }
 }

@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.SmartVehicle.backend.config.AdminKeyValidator;
+import com.SmartVehicle.backend.dto.EvaluateVehicleRequest;
+import com.SmartVehicle.backend.dto.RcResponse;
 import com.SmartVehicle.backend.exception.RcNotFoundException;
 import com.SmartVehicle.backend.exception.UnauthorizedException;
 import com.SmartVehicle.backend.model.OwnershipHistory;
@@ -32,8 +34,6 @@ import com.SmartVehicle.backend.service.RiskAssessmentService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-
-import com.SmartVehicle.backend.dto.RcResponse;
 
 @RestController
 @RequestMapping("/api/rc")
@@ -50,7 +50,7 @@ public class RcController {
     public List<RcResponse> getAll(HttpServletRequest request) {
         boolean isAdmin = adminKeyValidator.isAdminAuthorized(request);
         return rcService.getAll().stream()
-                .map(rc -> RcResponse.fromEntity(rc, isAdmin))
+                .map(rc -> toResponse(rc, isAdmin))
                 .toList();
     }
 
@@ -61,7 +61,7 @@ public class RcController {
             throw new RcNotFoundException("Vehicle not found with ID: " + id);
         }
         boolean isAdmin = adminKeyValidator.isAdminAuthorized(request);
-        return RcResponse.fromEntity(rc, isAdmin);
+        return toResponse(rc, isAdmin);
     }
 
     @GetMapping("/{id}/history")
@@ -76,11 +76,11 @@ public class RcController {
             throw new RcNotFoundException("Vehicle not found with RC Number: " + rcNumber);
         }
         boolean isAdmin = adminKeyValidator.isAdminAuthorized(request);
-        return RcResponse.fromEntity(found, isAdmin);
+        return toResponse(found, isAdmin);
     }
 
     @PostMapping("/evaluate")
-    public RiskAssessment evaluateVehicle(@RequestBody Rc requestPayload) {
+    public RiskAssessment evaluateVehicle(@RequestBody EvaluateVehicleRequest requestPayload) {
         if (requestPayload.getRcNumber() == null || requestPayload.getRcNumber().isBlank()) {
             throw new IllegalArgumentException("rcNumber is required");
         }
@@ -90,8 +90,21 @@ public class RcController {
             throw new RcNotFoundException("RC not found: " + cleanRcNumber);
         }
 
-        SellerClaim sellerClaim = requestPayload.getSellerClaim();
-        return riskAssessmentService.evaluate(existingRc, sellerClaim);
+        SellerClaim sellerClaim = null;
+        if (requestPayload.getSellerClaim() != null) {
+            sellerClaim = new SellerClaim();
+            sellerClaim.setClaimedOwnerCount(requestPayload.getSellerClaim().getClaimedOwnerCount());
+            sellerClaim.setClaimedAccidentFree(requestPayload.getSellerClaim().getClaimedAccidentFree());
+            sellerClaim.setClaimedOriginalEngine(requestPayload.getSellerClaim().getClaimedOriginalEngine());
+            sellerClaim.setClaimedOriginalChassis(requestPayload.getSellerClaim().getClaimedOriginalChassis());
+            sellerClaim.setClaimedInsuranceValid(requestPayload.getSellerClaim().getClaimedInsuranceValid());
+            sellerClaim.setClaimedLoanCleared(requestPayload.getSellerClaim().getClaimedLoanCleared());
+        }
+
+        int transfersCount = (int) ownershipHistoryRepository.countByRcId(existingRc.getId());
+        int actualOwnersCount = 1 + transfersCount;
+
+        return riskAssessmentService.evaluate(existingRc, sellerClaim, actualOwnersCount);
     }
 
     @GetMapping("/stats")
@@ -157,7 +170,7 @@ public class RcController {
         List<Rc> slice = filtered.subList(from, to);
         boolean isAdmin = adminKeyValidator.isAdminAuthorized(request);
         List<RcResponse> dtoList = slice.stream()
-                .map(rc -> RcResponse.fromEntity(rc, isAdmin))
+                .map(rc -> toResponse(rc, isAdmin))
                 .toList();
         int totalPages = (int) Math.ceil(total / (double) size);
 
@@ -174,19 +187,27 @@ public class RcController {
     public RcResponse create(@RequestBody Rc rc, HttpServletRequest request) {
         if (!adminKeyValidator.isAdminAuthorized(request)) throw new UnauthorizedException();
         Rc saved = rcService.add(rc);
-        return RcResponse.fromEntity(saved, true);
+        return toResponse(saved, true);
     }
 
     @PutMapping("/{id}")
     public RcResponse update(@PathVariable String id, @RequestBody Rc rc, HttpServletRequest request) {
         if (!adminKeyValidator.isAdminAuthorized(request)) throw new UnauthorizedException();
         Rc updated = rcService.update(id, rc);
-        return RcResponse.fromEntity(updated, true);
+        return toResponse(updated, true);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable String id, HttpServletRequest request) {
         if (!adminKeyValidator.isAdminAuthorized(request)) throw new UnauthorizedException();
         rcService.delete(id);
+    }
+
+    private RcResponse toResponse(Rc rc, boolean isAdmin) {
+        if (rc == null) return null;
+        List<OwnershipHistory> history = ownershipHistoryRepository.findByRcIdOrderByTransferredAtDesc(rc.getId());
+        int ownersCount = 1 + history.size();
+        List<String> previousOwners = history.stream().map(OwnershipHistory::getPreviousOwnerName).filter(n -> n != null && !n.isBlank()).toList();
+        return RcResponse.fromEntity(rc, isAdmin, ownersCount, previousOwners);
     }
 }

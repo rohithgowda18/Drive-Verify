@@ -24,7 +24,6 @@ public class RiskAssessmentServiceTest {
     public void testCleanVehicleEvaluation() {
         Rc rc = new Rc();
         rc.setRcNumber("KA01AB1234");
-        rc.setOwnersCount(1);
         rc.setStolen(false);
         rc.setSuspicious(false);
         Rc.Insurance ins = new Rc.Insurance();
@@ -37,7 +36,7 @@ public class RiskAssessmentServiceTest {
         SellerClaim claim = new SellerClaim();
         claim.setClaimedOwnerCount(1);
 
-        RiskAssessment assessment = riskAssessmentService.evaluate(rc, claim);
+        RiskAssessment assessment = riskAssessmentService.evaluate(rc, claim, 1);
 
         assertNotNull(assessment);
         assertEquals(100, assessment.getTrustScore());
@@ -49,13 +48,12 @@ public class RiskAssessmentServiceTest {
     public void testOwnerCountMismatchAndStolenFlag() {
         Rc rc = new Rc();
         rc.setRcNumber("KA01AB1234");
-        rc.setOwnersCount(3);
         rc.setStolen(true);
 
         SellerClaim claim = new SellerClaim();
         claim.setClaimedOwnerCount(1); // Mismatch: seller claims 1, actual is 3
 
-        RiskAssessment assessment = riskAssessmentService.evaluate(rc, claim);
+        RiskAssessment assessment = riskAssessmentService.evaluate(rc, claim, 3);
 
         assertNotNull(assessment);
         assertEquals("HIGH", assessment.getRiskLevel());

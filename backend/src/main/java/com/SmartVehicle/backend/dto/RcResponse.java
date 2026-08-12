@@ -27,7 +27,6 @@ public class RcResponse {
     private String registrationState;
     private Boolean stolen;
     private Boolean suspicious;
-    private Integer verified;
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -41,7 +40,7 @@ public class RcResponse {
         private String aadhaarLast4;
     }
 
-    public static RcResponse fromEntity(Rc rc, boolean isAdmin) {
+    public static RcResponse fromEntity(Rc rc, boolean isAdmin, int ownersCount, List<String> previousOwners) {
         if (rc == null) return null;
 
         OwnerDto ownerDto = null;
@@ -59,8 +58,8 @@ public class RcResponse {
         return RcResponse.builder()
                 .id(rc.getId())
                 .rcNumber(rc.getRcNumber())
-                .ownersCount(rc.getOwnersCount())
-                .previousOwners(rc.getPreviousOwners())
+                .ownersCount(ownersCount)
+                .previousOwners(previousOwners)
                 .owner(ownerDto)
                 .vehicleInfo(rc.getVehicleInfo())
                 .registrationInfo(rc.getRegistrationInfo())
@@ -71,10 +70,13 @@ public class RcResponse {
                 .registrationState(rc.getRegistrationState())
                 .stolen(rc.getStolen())
                 .suspicious(rc.getSuspicious())
-                .verified(rc.getVerified())
                 .createdAt(rc.getCreatedAt())
                 .updatedAt(rc.getUpdatedAt())
                 .build();
+    }
+
+    public static RcResponse fromEntity(Rc rc, boolean isAdmin) {
+        return fromEntity(rc, isAdmin, 1, List.of());
     }
 
     private static String maskLast4(String val) {

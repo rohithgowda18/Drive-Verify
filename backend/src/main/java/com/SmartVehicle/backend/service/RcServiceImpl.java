@@ -1,13 +1,11 @@
 package com.SmartVehicle.backend.service;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import com.SmartVehicle.backend.exception.RcNotFoundException;
@@ -39,23 +37,12 @@ public class RcServiceImpl implements RcService {
 
     @Override
     public Rc searchByRcNumber(String rcNumber) {
-        Rc found = repo.findByRcNumber(rcNumber);
-        if (found != null) {
-            Query query = new Query(Criteria.where("rcNumber").is(rcNumber));
-            Update update = new Update()
-                    .inc("verified", 1)
-                    .set("updatedAt", Instant.now());
-            mongoTemplate.updateFirst(query, update, Rc.class);
-            found.setVerified((found.getVerified() == null ? 0 : found.getVerified()) + 1);
-            found.setUpdatedAt(Instant.now());
-        }
-        return found;
+        return repo.findByRcNumber(rcNumber);
     }
 
     @Override
     public Rc add(Rc rc) {
         validateRequired(rc);
-        normalizeAndEnsureConsistency(rc);
         rc.setCreatedAt(Instant.now());
         rc.setUpdatedAt(Instant.now());
         Rc saved = repo.save(rc);
@@ -77,7 +64,6 @@ public class RcServiceImpl implements RcService {
         }
         rc.setId(id);
         validateRequired(rc);
-        normalizeAndEnsureConsistency(rc);
         rc.setUpdatedAt(Instant.now());
         Rc saved = repo.save(rc);
         // Record ownership change if owner name differs
@@ -151,13 +137,5 @@ public class RcServiceImpl implements RcService {
         if (rc.getEngineNumber() == null || rc.getEngineNumber().isBlank()) {
             throw new IllegalArgumentException("engineNumber is required");
         }
-    }
-
-    private void normalizeAndEnsureConsistency(Rc rc) {
-        if (rc.getPreviousOwners() == null) {
-            rc.setPreviousOwners(new ArrayList<>());
-        }
-        int computed = 1 + rc.getPreviousOwners().size();
-        rc.setOwnersCount(computed);
     }
 }

@@ -8,4 +8,5 @@ import com.SmartVehicle.backend.model.OwnershipHistory;
 
 public interface OwnershipHistoryRepository extends MongoRepository<OwnershipHistory, String> {
     List<OwnershipHistory> findByRcIdOrderByTransferredAtDesc(String rcId);
+    long countByRcId(String rcId);
 }

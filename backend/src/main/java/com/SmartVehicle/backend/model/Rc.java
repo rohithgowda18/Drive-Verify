@@ -1,7 +1,6 @@
 package com.SmartVehicle.backend.model;
 
 import java.time.Instant;
-import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
@@ -19,8 +18,6 @@ public class Rc {
 
     @Indexed(unique = true)
     private String rcNumber;
-    private int ownersCount;
-    private List<String> previousOwners;
 
     private Owner owner;
     private VehicleInfo vehicleInfo;
@@ -32,15 +29,11 @@ public class Rc {
     private String registrationState;
     private Boolean stolen;
     private Boolean suspicious;
-    private Integer verified;
     private Instant createdAt;
     private Instant updatedAt;
 
     @Version
     private Long version;
-
-    private SellerClaim sellerClaim;
-    private RiskAssessment riskAssessment;
 
     @Data
     public static class Owner {
@@ -80,7 +73,5 @@ public class Rc {
     public static class Puc {
         private String certificateNumber;
         private String validTill;
-        private boolean stolen;
-        private boolean suspicious;
     }
 }
