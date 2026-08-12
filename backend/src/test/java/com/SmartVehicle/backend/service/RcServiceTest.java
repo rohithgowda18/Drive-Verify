@@ -36,13 +36,16 @@ public class RcServiceTest {
     @Mock
     private EmailService emailService;
 
+    @Mock
+    private org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
+
     private RcServiceImpl rcService;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         when(meterRegistry.counter(anyString(), any(String[].class))).thenReturn(counter);
-        rcService = new RcServiceImpl(rcRepository, ownershipHistoryRepository, meterRegistry, emailService);
+        rcService = new RcServiceImpl(rcRepository, ownershipHistoryRepository, meterRegistry, emailService, mongoTemplate);
     }
 
     @Test

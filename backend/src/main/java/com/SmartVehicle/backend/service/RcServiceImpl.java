@@ -1,43 +1,49 @@
 package com.SmartVehicle.backend.service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.MeterRegistry;
 
-import com.SmartVehicle.backend.model.Rc;
+import com.SmartVehicle.backend.exception.RcNotFoundException;
 import com.SmartVehicle.backend.model.OwnershipHistory;
+import com.SmartVehicle.backend.model.Rc;
 import com.SmartVehicle.backend.repository.OwnershipHistoryRepository;
 import com.SmartVehicle.backend.repository.RcRepository;
-import org.springframework.beans.factory.annotation.Qualifier;
 
-@SuppressWarnings("unused")
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import lombok.RequiredArgsConstructor;
 
 @Service
 public class RcServiceImpl implements RcService {
 
     private final RcRepository repo;
     private final OwnershipHistoryRepository ownershipHistoryRepository;
-    private final Counter rcCreateCounter;
-    private final Counter rcUpdateCounter;
-    private final Counter rcDeleteCounter;
-    private final Counter rcSearchCounter;
-
-    @Autowired
     private final EmailService emailService;
+    private final MongoTemplate mongoTemplate;
+    private final MeterRegistry meterRegistry;
 
-    @Autowired
-    public RcServiceImpl(RcRepository repo, OwnershipHistoryRepository ownershipHistoryRepository, MeterRegistry meterRegistry, EmailService emailService) {
+    private Counter rcCreateCounter;
+    private Counter rcUpdateCounter;
+    private Counter rcDeleteCounter;
+    private Counter rcSearchCounter;
+
+    public RcServiceImpl(RcRepository repo, OwnershipHistoryRepository ownershipHistoryRepository, MeterRegistry meterRegistry, EmailService emailService, MongoTemplate mongoTemplate) {
         this.repo = repo;
         this.ownershipHistoryRepository = ownershipHistoryRepository;
+        this.meterRegistry = meterRegistry;
+        this.emailService = emailService;
+        this.mongoTemplate = mongoTemplate;
         this.rcCreateCounter = meterRegistry.counter("rc_operations_total", "operation", "create");
         this.rcUpdateCounter = meterRegistry.counter("rc_operations_total", "operation", "update");
         this.rcDeleteCounter = meterRegistry.counter("rc_operations_total", "operation", "delete");
         this.rcSearchCounter = meterRegistry.counter("rc_operations_total", "operation", "search");
-        this.emailService = emailService;
     }
 
     @Override
@@ -55,10 +61,8 @@ public class RcServiceImpl implements RcService {
         Rc found = repo.findByRcNumber(rcNumber);
         rcSearchCounter.increment();
         if (found != null) {
-            org.springframework.data.mongodb.core.query.Query query = new org.springframework.data.mongodb.core.query.Query(
-                    org.springframework.data.mongodb.core.query.Criteria.where("rcNumber").is(rcNumber)
-            );
-            org.springframework.data.mongodb.core.query.Update update = new org.springframework.data.mongodb.core.query.Update()
+            Query query = new Query(Criteria.where("rcNumber").is(rcNumber));
+            Update update = new Update()
                     .inc("verified", 1)
                     .set("updatedAt", Instant.now());
             mongoTemplate.updateFirst(query, update, Rc.class);
@@ -90,7 +94,7 @@ public class RcServiceImpl implements RcService {
     public Rc update(String id, Rc rc) {
         Rc existing = repo.findById(id).orElse(null);
         if (existing == null) {
-            throw new com.SmartVehicle.backend.exception.RcNotFoundException("Vehicle not found with ID: " + id);
+            throw new RcNotFoundException("Vehicle not found with ID: " + id);
         }
         rc.setId(id);
         validateRequired(rc);
@@ -99,7 +103,7 @@ public class RcServiceImpl implements RcService {
         Rc saved = repo.save(rc);
         rcUpdateCounter.increment();
         // Record ownership change if owner name differs
-        if (existing != null && existing.getOwner() != null && rc.getOwner() != null) {
+        if (existing.getOwner() != null && rc.getOwner() != null) {
             String oldName = existing.getOwner().getName();
             String newName = rc.getOwner().getName();
             if (oldName != null && newName != null && !oldName.equals(newName)) {
@@ -130,26 +134,23 @@ public class RcServiceImpl implements RcService {
         rcDeleteCounter.increment();
     }
 
-    @Autowired
-    private org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
-
     @Override
     public List<Rc> getFiltered(String registrationState, Boolean stolen, Boolean suspicious, String make, String ownerName) {
-        org.springframework.data.mongodb.core.query.Query query = new org.springframework.data.mongodb.core.query.Query();
+        Query query = new Query();
         if (registrationState != null && !registrationState.isBlank()) {
-            query.addCriteria(org.springframework.data.mongodb.core.query.Criteria.where("registrationState").regex(registrationState, "i"));
+            query.addCriteria(Criteria.where("registrationState").regex(registrationState, "i"));
         }
         if (stolen != null) {
-            query.addCriteria(org.springframework.data.mongodb.core.query.Criteria.where("stolen").is(stolen));
+            query.addCriteria(Criteria.where("stolen").is(stolen));
         }
         if (suspicious != null) {
-            query.addCriteria(org.springframework.data.mongodb.core.query.Criteria.where("suspicious").is(suspicious));
+            query.addCriteria(Criteria.where("suspicious").is(suspicious));
         }
         if (make != null && !make.isBlank()) {
-            query.addCriteria(org.springframework.data.mongodb.core.query.Criteria.where("vehicleInfo.make").regex(make, "i"));
+            query.addCriteria(Criteria.where("vehicleInfo.make").regex(make, "i"));
         }
         if (ownerName != null && !ownerName.isBlank()) {
-            query.addCriteria(org.springframework.data.mongodb.core.query.Criteria.where("owner.name").regex(ownerName, "i"));
+            query.addCriteria(Criteria.where("owner.name").regex(ownerName, "i"));
         }
         return mongoTemplate.find(query, Rc.class);
     }
@@ -176,11 +177,9 @@ public class RcServiceImpl implements RcService {
     }
 
     private void normalizeAndEnsureConsistency(Rc rc) {
-        // Ensure previousOwners is non-null
         if (rc.getPreviousOwners() == null) {
-            rc.setPreviousOwners(new java.util.ArrayList<>());
+            rc.setPreviousOwners(new ArrayList<>());
         }
-        // ownersCount must be 1 (current owner) + previous owners length
         int computed = 1 + rc.getPreviousOwners().size();
         rc.setOwnersCount(computed);
     }
