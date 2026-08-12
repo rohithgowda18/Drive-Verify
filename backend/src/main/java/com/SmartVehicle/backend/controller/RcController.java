@@ -33,6 +33,8 @@ import com.SmartVehicle.backend.service.RiskAssessmentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
+import com.SmartVehicle.backend.dto.RcResponse;
+
 @RestController
 @RequestMapping("/api/rc")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -45,24 +47,21 @@ public class RcController {
     private final RiskAssessmentService riskAssessmentService;
 
     @GetMapping
-    public List<Rc> getAll(HttpServletRequest request) {
-        List<Rc> all = rcService.getAll();
-        if (!adminKeyValidator.isAdminAuthorized(request)) {
-            all.forEach(this::maskPii);
-        }
-        return all;
+    public List<RcResponse> getAll(HttpServletRequest request) {
+        boolean isAdmin = adminKeyValidator.isAdminAuthorized(request);
+        return rcService.getAll().stream()
+                .map(rc -> RcResponse.fromEntity(rc, isAdmin))
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public Rc getById(@PathVariable String id, HttpServletRequest request) {
+    public RcResponse getById(@PathVariable String id, HttpServletRequest request) {
         Rc rc = rcService.getById(id);
         if (rc == null) {
             throw new RcNotFoundException("Vehicle not found with ID: " + id);
         }
-        if (!adminKeyValidator.isAdminAuthorized(request)) {
-            maskPii(rc);
-        }
-        return rc;
+        boolean isAdmin = adminKeyValidator.isAdminAuthorized(request);
+        return RcResponse.fromEntity(rc, isAdmin);
     }
 
     @GetMapping("/{id}/history")
@@ -71,15 +70,13 @@ public class RcController {
     }
 
     @GetMapping("/search")
-    public Rc searchByRcNumber(@RequestParam String rcNumber, HttpServletRequest request) {
+    public RcResponse searchByRcNumber(@RequestParam String rcNumber, HttpServletRequest request) {
         Rc found = rcService.searchByRcNumber(rcNumber);
         if (found == null) {
             throw new RcNotFoundException("Vehicle not found with RC Number: " + rcNumber);
         }
-        if (!adminKeyValidator.isAdminAuthorized(request)) {
-            maskPii(found);
-        }
-        return found;
+        boolean isAdmin = adminKeyValidator.isAdminAuthorized(request);
+        return RcResponse.fromEntity(found, isAdmin);
     }
 
     @PostMapping("/evaluate")
@@ -158,13 +155,14 @@ public class RcController {
         int from = Math.min(page * size, total);
         int to = Math.min(from + size, total);
         List<Rc> slice = filtered.subList(from, to);
-        if (!adminKeyValidator.isAdminAuthorized(request)) {
-            slice.forEach(this::maskPii);
-        }
+        boolean isAdmin = adminKeyValidator.isAdminAuthorized(request);
+        List<RcResponse> dtoList = slice.stream()
+                .map(rc -> RcResponse.fromEntity(rc, isAdmin))
+                .toList();
         int totalPages = (int) Math.ceil(total / (double) size);
 
         Map<String, Object> result = new HashMap<>();
-        result.put("items", slice);
+        result.put("items", dtoList);
         result.put("page", page);
         result.put("size", size);
         result.put("total", total);
@@ -173,37 +171,22 @@ public class RcController {
     }
 
     @PostMapping
-    public Rc create(@RequestBody Rc rc, HttpServletRequest request) {
+    public RcResponse create(@RequestBody Rc rc, HttpServletRequest request) {
         if (!adminKeyValidator.isAdminAuthorized(request)) throw new UnauthorizedException();
-        return rcService.add(rc);
+        Rc saved = rcService.add(rc);
+        return RcResponse.fromEntity(saved, true);
     }
 
     @PutMapping("/{id}")
-    public Rc update(@PathVariable String id, @RequestBody Rc rc, HttpServletRequest request) {
+    public RcResponse update(@PathVariable String id, @RequestBody Rc rc, HttpServletRequest request) {
         if (!adminKeyValidator.isAdminAuthorized(request)) throw new UnauthorizedException();
-        return rcService.update(id, rc);
+        Rc updated = rcService.update(id, rc);
+        return RcResponse.fromEntity(updated, true);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable String id, HttpServletRequest request) {
         if (!adminKeyValidator.isAdminAuthorized(request)) throw new UnauthorizedException();
         rcService.delete(id);
-    }
-
-    private void maskPii(Rc rc) {
-        if (rc == null) return;
-        if (rc.getChassisNumber() != null && rc.getChassisNumber().length() > 4) {
-            rc.setChassisNumber("****" + rc.getChassisNumber().substring(rc.getChassisNumber().length() - 4));
-        }
-        if (rc.getEngineNumber() != null && rc.getEngineNumber().length() > 4) {
-            rc.setEngineNumber("****" + rc.getEngineNumber().substring(rc.getEngineNumber().length() - 4));
-        }
-        if (rc.getOwner() != null) {
-            Rc.Owner o = rc.getOwner();
-            if (o.getPhone() != null) o.setPhone("******" + (o.getPhone().length() >= 4 ? o.getPhone().substring(o.getPhone().length() - 4) : ""));
-            if (o.getEmail() != null) o.setEmail("masked@privacy.internal");
-            if (o.getAddress() != null) o.setAddress("Protected PII Address");
-            if (o.getAadhaarLast4() != null) o.setAadhaarLast4("****");
-        }
     }
 }
