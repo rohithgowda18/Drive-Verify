@@ -102,7 +102,7 @@
               },
               {
                 "key": "X-Admin-Secret-Key",
-                "value": "secret-admin-key",
+                "value": "{{ADMIN_SECRET_KEY}}",
                 "type": "text"
               }
             ],
@@ -132,7 +132,7 @@
               },
               {
                 "key": "X-Admin-Secret-Key",
-                "value": "secret-admin-key",
+                "value": "{{ADMIN_SECRET_KEY}}",
                 "type": "text"
               }
             ],
@@ -186,7 +186,7 @@
             "header": [
               {
                 "key": "X-Admin-Secret-Key",
-                "value": "secret-admin-key",
+                "value": "{{ADMIN_SECRET_KEY}}",
                 "type": "text"
               }
             ],

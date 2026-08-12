@@ -92,7 +92,7 @@ spring.data.mongodb.database=${SPRING_DATA_MONGODB_DATABASE:vehicledb}
 spring.data.mongodb.auto-index-creation=true
 
 # Admin Authorization Secret Key
-admin.secret.key=${ADMIN_SECRET_KEY:secret-admin-key}
+admin.secret.key=${ADMIN_SECRET_KEY}
 
 management.endpoints.web.exposure.include=health,info,prometheus
 ```
