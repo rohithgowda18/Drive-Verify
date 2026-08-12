@@ -173,8 +173,7 @@ const Vehicles = () => {
   };
 
   useEffect(() => {
-    const key = localStorage.getItem("adminKey");
-    if (!key) {
+    if (!auth.isAuthenticated()) {
       toast.error("Please start an Admin Session first.");
       navigate("/auth");
       return;
