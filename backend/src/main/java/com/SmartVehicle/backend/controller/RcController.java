@@ -74,22 +74,12 @@ public class RcController {
         }
         String cleanRcNumber = requestPayload.getRcNumber().trim();
         Rc existingRc = rcService.searchByRcNumber(cleanRcNumber);
-
-        SellerClaim sellerClaim = requestPayload.getSellerClaim();
-        RiskAssessment assessment = riskAssessmentService.evaluate(existingRc, sellerClaim, null);
-
-        if (existingRc != null) {
-            org.springframework.data.mongodb.core.query.Query query = new org.springframework.data.mongodb.core.query.Query(
-                    org.springframework.data.mongodb.core.query.Criteria.where("rcNumber").is(cleanRcNumber)
-            );
-            org.springframework.data.mongodb.core.query.Update update = new org.springframework.data.mongodb.core.query.Update()
-                    .set("sellerClaim", sellerClaim)
-                    .set("riskAssessment", assessment)
-                    .set("updatedAt", java.time.Instant.now());
-            mongoTemplate.updateFirst(query, update, Rc.class);
+        if (existingRc == null) {
+            throw new com.SmartVehicle.backend.exception.RcNotFoundException("RC not found: " + cleanRcNumber);
         }
 
-        return assessment;
+        SellerClaim sellerClaim = requestPayload.getSellerClaim();
+        return riskAssessmentService.evaluate(existingRc, sellerClaim);
     }
 
     @GetMapping("/stats")

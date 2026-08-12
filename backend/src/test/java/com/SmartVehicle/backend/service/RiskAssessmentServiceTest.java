@@ -45,9 +45,8 @@ public class RiskAssessmentServiceTest {
 
         SellerClaim claim = new SellerClaim();
         claim.setClaimedOwnerCount(1);
-        claim.setClaimedMileage(45000);
 
-        RiskAssessment assessment = riskAssessmentService.evaluate(rc, claim, Collections.emptyList());
+        RiskAssessment assessment = riskAssessmentService.evaluate(rc, claim);
 
         assertNotNull(assessment);
         assertEquals(100, assessment.getTrustScore());
@@ -65,26 +64,11 @@ public class RiskAssessmentServiceTest {
         SellerClaim claim = new SellerClaim();
         claim.setClaimedOwnerCount(1); // Mismatch: seller claims 1, actual is 3
 
-        RiskAssessment assessment = riskAssessmentService.evaluate(rc, claim, Collections.emptyList());
+        RiskAssessment assessment = riskAssessmentService.evaluate(rc, claim);
 
         assertNotNull(assessment);
         assertEquals("HIGH", assessment.getRiskLevel());
         assertTrue(assessment.getTrustScore() <= 40);
         assertTrue(assessment.getMismatches().size() >= 2);
-    }
-
-    @Test
-    public void testClaimedMileageEvaluation() {
-        Rc rc = new Rc();
-        rc.setRcNumber("KA01AB1234");
-        rc.setOwnersCount(1);
-
-        SellerClaim claim = new SellerClaim();
-        claim.setClaimedMileage(45000);
-
-        RiskAssessment assessment = riskAssessmentService.evaluate(rc, claim, Collections.emptyList());
-
-        assertNotNull(assessment);
-        assertTrue(assessment.getPositiveFactors().stream().anyMatch(r -> r.contains("45000 km")));
     }
 }

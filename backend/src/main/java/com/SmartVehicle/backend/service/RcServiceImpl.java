@@ -89,6 +89,9 @@ public class RcServiceImpl implements RcService {
     @Override
     public Rc update(String id, Rc rc) {
         Rc existing = repo.findById(id).orElse(null);
+        if (existing == null) {
+            throw new com.SmartVehicle.backend.exception.RcNotFoundException("Vehicle not found with ID: " + id);
+        }
         rc.setId(id);
         validateRequired(rc);
         normalizeAndEnsureConsistency(rc);

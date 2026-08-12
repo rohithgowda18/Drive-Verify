@@ -7,14 +7,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.SmartVehicle.backend.model.Evidence;
 import com.SmartVehicle.backend.model.Rc;
 import com.SmartVehicle.backend.model.RiskAssessment;
 import com.SmartVehicle.backend.model.SellerClaim;
 @Service
 public class RiskAssessmentService {
 
-    public RiskAssessment evaluate(Rc rc, SellerClaim claim, List<Evidence> evidences) {
+    public RiskAssessment evaluate(Rc rc, SellerClaim claim) {
         int score = 100;
         List<String> mismatches = new ArrayList<>();
         List<String> riskReasons = new ArrayList<>();
@@ -77,19 +76,6 @@ public class RiskAssessmentService {
         } else {
             score -= 5;
             riskReasons.add("PUC certificate status unverified");
-        }
-
-        // 5. Evidence Document Analysis
-        if (evidences != null && !evidences.isEmpty()) {
-            for (Evidence ev : evidences) {
-                if ("MISMATCH".equalsIgnoreCase(ev.getStatus())) {
-                    score -= 15;
-                    mismatches.add("🔴 Uploaded document (" + ev.getType() + ") contains data mismatches");
-                    riskReasons.add("Uploaded evidence document (" + ev.getDocumentName() + ") failed verification check");
-                } else if ("VERIFIED".equalsIgnoreCase(ev.getStatus())) {
-                    positiveFactors.add("🟢 Verified evidence document: " + ev.getType());
-                }
-            }
         }
 
         // Final score calculation & risk classification
