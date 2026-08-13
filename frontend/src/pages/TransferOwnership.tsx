@@ -104,8 +104,6 @@ const TransferOwnership = () => {
       if (rc.owner?.name) prev.push(rc.owner.name);
       const updated = {
         ...rc,
-        previousOwners: prev,
-        ownersCount: 1 + prev.length,
         owner: {
           name: newOwner.name.trim(),
           email: newOwner.email?.trim() || rc.owner?.email,
@@ -115,12 +113,16 @@ const TransferOwnership = () => {
         },
         updatedAt: new Date().toISOString(),
       };
-      await apiClient.rc.update(rc.id, updated);
-      toast.success("Ownership transferred");
+      delete updated.previousOwners;
+      delete updated.ownersCount;
+      const updatedResponse = await apiClient.rc.update(rc.id, updated);
+      toast.success("Ownership transferred successfully!");
       setNewOwner({ name: "", email: "", phone: "", address: "", aadhaarLast4: "" });
-      setPreviousOwners(updated.previousOwners);
-      setOwnersCount(updated.ownersCount);
-      setCurrentOwner(updated.owner);
+      if (updatedResponse) {
+        setPreviousOwners(updatedResponse.previousOwners || []);
+        setOwnersCount(updatedResponse.ownersCount || 1);
+        setCurrentOwner(updatedResponse.owner);
+      }
       setConfirmOpen(false);
     } catch (err: unknown) {
       const message = err && typeof err === "object" && "message" in err ? String((err as { message?: string }).message) : "Transfer failed";
