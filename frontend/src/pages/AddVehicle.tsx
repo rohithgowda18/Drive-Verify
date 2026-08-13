@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Shield, PlusCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
-import { rcSchema } from "@/lib/validation";
+import { vehicleCreateSchema } from "@/lib/validation";
 
 const AddVehicle = () => {
   const navigate = useNavigate();
@@ -51,7 +51,7 @@ const AddVehicle = () => {
         },
       };
 
-      const validation = rcSchema.safeParse(payload);
+      const validation = vehicleCreateSchema.safeParse(payload);
       if (!validation.success) {
         const firstError = validation.error.issues[0]?.message || "Validation failed";
         toast.error(firstError);
