@@ -37,7 +37,7 @@ export const apiClient = {
       const response = await fetch(`${API_BASE_URL}/api/auth/admin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ adminKey }),
+        body: JSON.stringify(adminKey),
       });
       return handleResponse(response);
     },
