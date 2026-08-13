@@ -63,6 +63,7 @@ public class RcServiceImpl implements RcService {
             throw new RcNotFoundException("Vehicle not found with ID: " + id);
         }
         rc.setId(id);
+        rc.setVersion(existing.getVersion());
         validateRequired(rc);
         rc.setUpdatedAt(Instant.now());
         Rc saved = repo.save(rc);
