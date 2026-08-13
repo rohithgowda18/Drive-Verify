@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, ArrowLeft, Trash2, RefreshCw, Eye, Replace, History, MoreVertical } from "lucide-react";
+import { Shield, ArrowLeft, Trash2, RefreshCw, Eye, Replace, History, MoreVertical, PlusCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiClient } from "@/lib/api";
 import { vehicleCreateSchema } from "@/lib/validation";
