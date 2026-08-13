@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, QrCode, Database, BarChart3, Users, LogOut } from "lucide-react";
+import { Shield, QrCode, Database, BarChart3, Users, LogOut, PlusCircle } from "lucide-react";
 import { toast } from "sonner";
 import { auth } from "@/lib/auth";
 
@@ -51,7 +51,7 @@ const Dashboard = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card 
             className="shadow-card hover:shadow-elevated transition-all cursor-pointer border-primary/20 hover:border-primary"
             onClick={() => navigate("/customer/verify")}
@@ -64,6 +64,23 @@ const Dashboard = () => {
                 <CardTitle className="text-xl">Verify RC</CardTitle>
                 <CardDescription className="mt-1">
                   Evaluate vehicle trust score & risk factors
+                </CardDescription>
+              </div>
+            </CardHeader>
+          </Card>
+
+          <Card 
+            className="shadow-card hover:shadow-elevated transition-all cursor-pointer border-primary/20 hover:border-primary"
+            onClick={() => navigate("/admin/add-vehicle")}
+          >
+            <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+              <div className="p-3 bg-primary/10 rounded-xl text-primary">
+                <PlusCircle className="h-8 w-8" />
+              </div>
+              <div>
+                <CardTitle className="text-xl">Add New Vehicle</CardTitle>
+                <CardDescription className="mt-1">
+                  Register a new RC record directly
                 </CardDescription>
               </div>
             </CardHeader>
