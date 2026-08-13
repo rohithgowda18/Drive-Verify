@@ -51,7 +51,7 @@ export const transferSchema = z.object({
     address: z.string().optional().or(z.literal("")),
     aadhaarLast4: z.string().length(4, "Last 4 digits").optional().or(z.literal(""))
   }),
-  adminKey: z.string().min(6, "Admin key required")
+  adminKey: z.string().optional()
 });
 
 export type TransferInput = z.infer<typeof transferSchema>;
