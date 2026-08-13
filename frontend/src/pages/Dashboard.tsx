@@ -53,15 +53,15 @@ const Dashboard = () => {
 
         <Tabs defaultValue="verify" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="verify">
+            <TabsTrigger value="verify" onClick={() => navigate("/customer/verify")}>
               <QrCode className="h-4 w-4 mr-2" />
               Verify RC
             </TabsTrigger>
-            <TabsTrigger value="vehicles">
+            <TabsTrigger value="vehicles" onClick={() => navigate("/admin/vehicles")}>
               <Database className="h-4 w-4 mr-2" />
               Vehicles
             </TabsTrigger>
-            <TabsTrigger value="analytics">
+            <TabsTrigger value="analytics" onClick={() => navigate("/admin/analytics")}>
               <BarChart3 className="h-4 w-4 mr-2" />
               Analytics
             </TabsTrigger>

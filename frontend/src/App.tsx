@@ -14,6 +14,7 @@ const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Vehicles = lazy(() => import("./pages/Vehicles"));
 const TransferOwnership = lazy(() => import("./pages/TransferOwnership"));
+const AddVehicle = lazy(() => import("./pages/AddVehicle"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -36,10 +37,12 @@ const App = () => (
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/admin/vehicles" element={<Vehicles />} />
+            <Route path="/admin/add-vehicle" element={<AddVehicle />} />
             <Route path="/admin/transfer" element={<TransferOwnership />} />
             <Route path="/admin/analytics" element={<Analytics />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/vehicles" element={<Vehicles />} />
+            <Route path="/add-vehicle" element={<AddVehicle />} />
             <Route path="/transfer" element={<TransferOwnership />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/auth" element={<AdminLogin />} />
