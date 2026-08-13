@@ -37,7 +37,7 @@ const Home = () => {
 
         <div className="grid md:grid-cols-2 gap-6 w-full max-w-2xl text-left">
           {/* Customer Card */}
-          <Card className="hover:shadow-elevated transition-all border-primary/20 flex flex-col justify-between group cursor-pointer" onClick={() => navigate("/customer")}>
+          <Card className="hover:shadow-elevated transition-all border-primary/20 flex flex-col justify-between group cursor-pointer" onClick={() => navigate("/customer/verify")}>
             <CardHeader className="space-y-3">
               <div className="bg-primary/10 w-12 h-12 rounded-xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                 <UserCheck className="h-6 w-6" />
