@@ -29,7 +29,8 @@ public class AuthController {
 
     @PostMapping("/admin")
     public ResponseEntity<Map<String, Object>> loginAdmin(@RequestBody String adminKey) {
-        if (adminKey != null && adminKey.equals(adminSecretKey)) {
+        String cleanKey = adminKey != null ? adminKey.trim().replace("\"", "") : "";
+        if (cleanKey.equals(adminSecretKey)) {
             String token = "ADM_SESS_" + UUID.randomUUID().toString();
             ACTIVE_SESSIONS.put(token, true);
             return ResponseEntity.ok(Map.of(
