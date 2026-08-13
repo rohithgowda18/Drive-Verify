@@ -51,97 +51,58 @@ const Dashboard = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="verify" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="verify" onClick={() => navigate("/customer/verify")}>
-              <QrCode className="h-4 w-4 mr-2" />
-              Verify RC
-            </TabsTrigger>
-            <TabsTrigger value="vehicles" onClick={() => navigate("/admin/vehicles")}>
-              <Database className="h-4 w-4 mr-2" />
-              Vehicles
-            </TabsTrigger>
-            <TabsTrigger value="analytics" onClick={() => navigate("/admin/analytics")}>
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Analytics
-            </TabsTrigger>
-            <TabsTrigger value="users">
-              <Users className="h-4 w-4 mr-2" />
-              Users
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="verify" className="space-y-4">
-            <Card className="shadow-card">
-              <CardHeader>
-                <CardTitle>RC Verification</CardTitle>
-                <CardDescription>
-                  Enter RC registration number to evaluate trust score & risk factors
+        <div className="grid md:grid-cols-3 gap-6">
+          <Card 
+            className="shadow-card hover:shadow-elevated transition-all cursor-pointer border-primary/20 hover:border-primary"
+            onClick={() => navigate("/customer/verify")}
+          >
+            <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+              <div className="p-3 bg-primary/10 rounded-xl text-primary">
+                <QrCode className="h-8 w-8" />
+              </div>
+              <div>
+                <CardTitle className="text-xl">Verify RC</CardTitle>
+                <CardDescription className="mt-1">
+                  Evaluate vehicle trust score & risk factors
                 </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <Button
-                    className="w-full"
-                    size="lg"
-                    onClick={() => navigate("/customer/verify")}
-                  >
-                    <QrCode className="h-5 w-5 mr-2" />
-                    Start Verification
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              </div>
+            </CardHeader>
+          </Card>
 
-          <TabsContent value="vehicles">
-            <Card className="shadow-card">
-              <CardHeader>
-                <CardTitle>Vehicle Database</CardTitle>
-                <CardDescription>View and manage registered vehicles</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button onClick={() => navigate("/admin/vehicles")}>
-                  View All Vehicles
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
+          <Card 
+            className="shadow-card hover:shadow-elevated transition-all cursor-pointer border-primary/20 hover:border-primary"
+            onClick={() => navigate("/admin/vehicles")}
+          >
+            <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+              <div className="p-3 bg-primary/10 rounded-xl text-primary">
+                <Database className="h-8 w-8" />
+              </div>
+              <div>
+                <CardTitle className="text-xl">Vehicles Database</CardTitle>
+                <CardDescription className="mt-1">
+                  View and manage all registered vehicle records
+                </CardDescription>
+              </div>
+            </CardHeader>
+          </Card>
 
-          <TabsContent value="analytics">
-            <Card className="shadow-card">
-              <CardHeader>
-                <CardTitle>Fraud Analytics</CardTitle>
-                <CardDescription>View fraud detection statistics and trends</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button onClick={() => navigate("/admin/analytics")}>
-                  View Analytics Dashboard
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="users">
-            <Card className="shadow-card">
-              <CardHeader>
-                <CardTitle>User Management</CardTitle>
-                <CardDescription>System Access & User Roles</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 p-4 rounded-lg text-sm flex items-center gap-3">
-                  <Users className="h-5 w-5 flex-shrink-0" />
-                  <span>
-                    <strong>Feature Notice:</strong> User management and RBAC system is not implemented right now. Admin access is controlled via System Secret Key authentication.
-                  </span>
-                </div>
-                <Button disabled variant="outline">
-                  User Management Unavailable
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+          <Card 
+            className="shadow-card hover:shadow-elevated transition-all cursor-pointer border-primary/20 hover:border-primary"
+            onClick={() => navigate("/admin/analytics")}
+          >
+            <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+              <div className="p-3 bg-primary/10 rounded-xl text-primary">
+                <BarChart3 className="h-8 w-8" />
+              </div>
+              <div>
+                <CardTitle className="text-xl">Fraud Analytics</CardTitle>
+                <CardDescription className="mt-1">
+                  Analyze fraud patterns, stolen stats & insights
+                </CardDescription>
+              </div>
+            </CardHeader>
+          </Card>
+        </div>
       </main>
     </div>
   );
