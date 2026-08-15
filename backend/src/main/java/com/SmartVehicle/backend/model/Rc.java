@@ -32,8 +32,6 @@ public class Rc {
     private Instant createdAt;
     private Instant updatedAt;
 
-    @Version
-    private Long version;
 
     @Data
     public static class Owner {
@@ -53,7 +51,9 @@ public class Rc {
         private String fuelType;
         private String color;
         private int manufactureYear;
+        private String imageUrl;
     }
+
 
     @Data
     public static class RegistrationInfo {

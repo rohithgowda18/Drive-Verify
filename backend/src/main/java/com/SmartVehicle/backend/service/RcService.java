@@ -11,5 +11,7 @@ public interface RcService {
     Rc add(Rc rc);
     Rc update(String id, Rc rc);
     void delete(String id);
+    Rc transferOwnership(String id, com.SmartVehicle.backend.dto.OwnershipTransferRequest request);
     List<Rc> getFiltered(String registrationState, Boolean stolen, Boolean suspicious, String make, String ownerName);
 }
+

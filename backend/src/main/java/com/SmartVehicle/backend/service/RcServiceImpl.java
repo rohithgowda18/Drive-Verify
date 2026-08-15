@@ -43,9 +43,13 @@ public class RcServiceImpl implements RcService {
     @Override
     public Rc add(Rc rc) {
         validateRequired(rc);
+        if (repo.findByRcNumber(rc.getRcNumber()) != null) {
+            throw new org.springframework.dao.DuplicateKeyException("Vehicle with this RC number already exists");
+        }
         rc.setCreatedAt(Instant.now());
         rc.setUpdatedAt(Instant.now());
         Rc saved = repo.save(rc);
+
         if (saved.getOwner() != null && saved.getOwner().getEmail() != null) {
             emailService.sendRcCreatedEmail(
                     saved.getOwner().getEmail(),
@@ -63,35 +67,65 @@ public class RcServiceImpl implements RcService {
             throw new RcNotFoundException("Vehicle not found with ID: " + id);
         }
         rc.setId(id);
-        rc.setVersion(existing.getVersion());
         validateRequired(rc);
         rc.setUpdatedAt(Instant.now());
-        Rc saved = repo.save(rc);
-        // Record ownership change if owner name differs
-        if (existing.getOwner() != null && rc.getOwner() != null) {
-            String oldName = existing.getOwner().getName();
-            String newName = rc.getOwner().getName();
-            if (oldName != null && newName != null && !oldName.equals(newName)) {
-                OwnershipHistory h = new OwnershipHistory();
-                h.setRcId(saved.getId());
-                h.setRcNumber(saved.getRcNumber());
-                h.setPreviousOwnerName(oldName);
-                h.setNewOwnerName(newName);
-                h.setTransferredAt(Instant.now());
-                h.setStolenAtTransfer(saved.getStolen());
-                h.setSuspiciousAtTransfer(saved.getSuspicious());
-                ownershipHistoryRepository.save(h);
-                if (saved.getOwner() != null && saved.getOwner().getEmail() != null) {
-                    emailService.sendOwnershipTransferEmail(
-                            saved.getOwner().getEmail(),
-                            saved.getOwner().getName(),
-                            saved.getRcNumber()
-                    );
-                }
-            }
+        return repo.save(rc);
+    }
+
+    @Override
+    public Rc transferOwnership(String id, com.SmartVehicle.backend.dto.OwnershipTransferRequest request) {
+        Rc existing = repo.findById(id).orElse(null);
+        if (existing == null) {
+            throw new RcNotFoundException("Vehicle not found with ID: " + id);
         }
+        if (request == null || request.getNewOwner() == null || request.getNewOwner().getName() == null || request.getNewOwner().getName().isBlank()) {
+            throw new IllegalArgumentException("newOwner.name is required");
+        }
+        String currentOwnerName = existing.getOwner() != null && existing.getOwner().getName() != null ? existing.getOwner().getName().trim() : "";
+        String newOwnerName = request.getNewOwner().getName().trim();
+        if (!currentOwnerName.isEmpty() && currentOwnerName.equalsIgnoreCase(newOwnerName)) {
+            throw new IllegalArgumentException("New owner cannot be the same as current owner");
+        }
+
+        String previousOwnerName = existing.getOwner() != null ? existing.getOwner().getName() : "";
+
+        Boolean stolenAtTransfer = existing.getStolen();
+        Boolean suspiciousAtTransfer = existing.getSuspicious();
+
+        // Mutate existing entity
+        existing.setOwner(request.getNewOwner());
+        existing.setUpdatedAt(Instant.now());
+
+        Rc saved = repo.save(existing);
+
+
+
+
+
+
+        OwnershipHistory history = new OwnershipHistory();
+        history.setId(null);
+        history.setRcId(saved.getId());
+        history.setRcNumber(saved.getRcNumber());
+
+        history.setPreviousOwnerName(previousOwnerName);
+        history.setNewOwnerName(newOwnerName);
+        history.setTransferredAt(Instant.now());
+        history.setStolenAtTransfer(stolenAtTransfer);
+        history.setSuspiciousAtTransfer(suspiciousAtTransfer);
+        ownershipHistoryRepository.save(history);
+
+        if (saved.getOwner() != null && saved.getOwner().getEmail() != null) {
+            emailService.sendOwnershipTransferEmail(
+                    saved.getOwner().getEmail(),
+                    saved.getOwner().getName(),
+                    saved.getRcNumber()
+            );
+        }
+
         return saved;
     }
+
 
     @Override
     public void delete(String id) {

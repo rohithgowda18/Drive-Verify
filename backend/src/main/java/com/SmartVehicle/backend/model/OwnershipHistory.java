@@ -15,10 +15,11 @@ public class OwnershipHistory {
     @Id
     private String id;
 
-    @Indexed
+    @Indexed(unique = false)
     private String rcId;
-    @Indexed
+    @Indexed(unique = false)
     private String rcNumber;
+
 
     private String previousOwnerName;
     private String newOwnerName;

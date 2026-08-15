@@ -33,11 +33,22 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(org.springframework.dao.DuplicateKeyException.class)
     public ResponseEntity<Object> handleDuplicateKey(org.springframework.dao.DuplicateKeyException ex) {
         Map<String, Object> body = new HashMap<>();
-        body.put("error", "Vehicle with this RC number already exists");
+        String errorMsg = ex.getMessage();
+        if (errorMsg != null && (errorMsg.contains("Vehicle with this RC number already exists") || (errorMsg.contains("vehicles") && errorMsg.contains("rcNumber")))) {
+            errorMsg = "Vehicle with this RC number already exists";
+        } else if (errorMsg == null || errorMsg.isBlank()) {
+            errorMsg = "Duplicate key constraint violation";
+        }
+        body.put("error", errorMsg);
         body.put("timestamp", Instant.now());
         body.put("status", 409);
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
+
+
+
+
+
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Object> handleBadRequest(IllegalArgumentException ex) {

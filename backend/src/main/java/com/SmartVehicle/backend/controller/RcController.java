@@ -197,11 +197,22 @@ public class RcController {
         return toResponse(updated, true);
     }
 
+    @PostMapping("/{id}/ownership-transfer")
+    public RcResponse transferOwnership(
+            @PathVariable String id,
+            @RequestBody com.SmartVehicle.backend.dto.OwnershipTransferRequest transferRequest,
+            HttpServletRequest request) {
+        if (!adminKeyValidator.isAdminAuthorized(request)) throw new UnauthorizedException();
+        Rc updated = rcService.transferOwnership(id, transferRequest);
+        return toResponse(updated, true);
+    }
+
     @DeleteMapping("/{id}")
     public void delete(@PathVariable String id, HttpServletRequest request) {
         if (!adminKeyValidator.isAdminAuthorized(request)) throw new UnauthorizedException();
         rcService.delete(id);
     }
+
 
     private RcResponse toResponse(Rc rc, boolean isAdmin) {
         if (rc == null) return null;

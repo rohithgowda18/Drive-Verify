@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Shield, ArrowLeft, Trash2, RefreshCw, Eye, Replace, History, MoreVertical, PlusCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiClient } from "@/lib/api";
+import { getVehicleImageUrl } from "@/lib/vehicleImages";
 import { vehicleCreateSchema } from "@/lib/validation";
+
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
@@ -248,20 +250,29 @@ const Vehicles = () => {
             ) : (
               <div className="grid gap-4">
                 {items.map((v) => (
-                  <Card key={v.id} className="border">
+                  <Card key={v.id} className="border overflow-hidden">
+
                     <CardHeader className="py-3">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <CardTitle className="text-base font-bold">{v.rcNumber}</CardTitle>
-                            {getStatusBadge(v.stolen, v.suspicious)}
-                            {getInsuranceBadge(v.insurance)}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={getVehicleImageUrl(v.vehicleInfo)}
+                            alt={`${v.vehicleInfo?.make || ""} ${v.vehicleInfo?.model || ""}`}
+                            className="w-16 h-16 rounded-md object-cover border bg-muted flex-shrink-0"
+                          />
+                          <div className="space-y-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <CardTitle className="text-base font-bold">{v.rcNumber}</CardTitle>
+                              {getStatusBadge(v.stolen, v.suspicious)}
+                              {getInsuranceBadge(v.insurance)}
+                            </div>
+                            <CardDescription className="text-sm">
+                              {v.vehicleInfo?.make} {v.vehicleInfo?.model} • Owner: <span className="font-medium text-foreground">{v.owner?.name}</span>
+                            </CardDescription>
                           </div>
-                          <CardDescription className="text-sm">
-                            {v.vehicleInfo?.make} {v.vehicleInfo?.model} • Owner: <span className="font-medium text-foreground">{v.owner?.name}</span>
-                          </CardDescription>
                         </div>
                         <div className="flex items-center gap-2">
+
                           <Button
                             variant="secondary"
                             size="sm"
@@ -269,6 +280,14 @@ const Vehicles = () => {
                             disabled={!v?.id}
                           >
                             <Eye className="h-4 w-4 mr-1" /> View
+                          </Button>
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => v?.rcNumber && navigate(`/transfer?rc=${encodeURIComponent(v.rcNumber)}`)}
+                            disabled={!v?.rcNumber}
+                          >
+                            <Replace className="h-4 w-4 mr-1" /> Transfer
                           </Button>
                           <Button
                             variant="outline"
@@ -287,12 +306,6 @@ const Vehicles = () => {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem
-                                onClick={() => v?.rcNumber && navigate(`/transfer?rc=${encodeURIComponent(v.rcNumber)}`)}
-                                disabled={!v?.rcNumber}
-                              >
-                                <Replace className="h-4 w-4 mr-2" /> Transfer Ownership
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
                                 className="text-destructive focus:text-destructive"
                                 onClick={() => {
                                   if (v?.id) {
@@ -309,6 +322,7 @@ const Vehicles = () => {
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
+
                         </div>
                       </div>
                     </CardHeader>

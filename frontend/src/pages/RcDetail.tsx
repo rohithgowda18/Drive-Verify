@@ -3,7 +3,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { apiClient } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Shield, Car, User, FileText, ShieldAlert, Award, Info, Key } from "lucide-react";
+import { ArrowLeft, Shield, Car, User, FileText, ShieldAlert, Award, Info, Key, Replace, History, Camera } from "lucide-react";
+import { getVehicleImageUrl } from "@/lib/vehicleImages";
+
+
 import { toast } from "sonner";
 import {
   Accordion,
@@ -93,16 +96,58 @@ const RcDetail = () => {
                     {rc.vehicleInfo?.make} {rc.vehicleInfo?.model} • {rc.owner?.name}
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex flex-col items-start gap-1">
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex flex-col items-start gap-1 mr-2">
                     <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Vehicle Status</span>
                     {getStatusBadge(rc.stolen, rc.suspicious)}
                   </div>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => rc?.rcNumber && navigate(`/transfer?rc=${encodeURIComponent(rc.rcNumber)}`)}
+                    disabled={!rc?.rcNumber}
+                  >
+                    <Replace className="h-4 w-4 mr-1" /> Transfer Ownership
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => rc?.id && navigate(`/rc/${rc.id}/history`)}
+                    disabled={!rc?.id}
+                  >
+                    <History className="h-4 w-4 mr-1" /> History
+                  </Button>
                 </div>
               </CardContent>
             </Card>
 
+
+            {/* Vehicle Image Banner Card */}
+            <Card className="overflow-hidden shadow-elevated border">
+
+              <div className="relative h-64 md:h-80 w-full bg-slate-900 group">
+                <img
+                  src={getVehicleImageUrl(rc.vehicleInfo)}
+                  alt={`${rc.vehicleInfo?.make || ""} ${rc.vehicleInfo?.model || "Vehicle"}`}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent flex flex-col justify-end p-6">
+                  <div className="flex items-center justify-between text-white">
+                    <div className="space-y-1">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/20 backdrop-blur-md text-white border border-white/30">
+                        <Camera className="h-3.5 w-3.5" />
+                        {rc.vehicleInfo?.make || "Vehicle"} {rc.vehicleInfo?.model || ""}
+                      </span>
+                      <h3 className="text-xl font-bold tracking-tight text-white">{rc.vehicleInfo?.make} {rc.vehicleInfo?.model} ({rc.vehicleInfo?.manufactureYear || new Date().getFullYear()})</h3>
+                      <p className="text-xs text-slate-300">Fuel: {rc.vehicleInfo?.fuelType || "Petrol"} • Color: {rc.vehicleInfo?.color || "N/A"}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
             <div className="grid md:grid-cols-2 gap-6">
+
               {/* Vehicle Information */}
               <Card className="shadow-card border">
                 <CardHeader className="flex flex-row items-center gap-2 pb-2">

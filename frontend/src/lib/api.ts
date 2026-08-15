@@ -116,6 +116,16 @@ export const apiClient = {
       return handleResponse(response);
     },
 
+    transferOwnership: async (id: string, data: { newOwner: any }) => {
+      const response = await fetch(`${API_BASE_URL}/api/rc/${id}/ownership-transfer`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(data),
+      });
+      return handleResponse(response);
+    },
+
+
     remove: async (id: string) => {
       const response = await fetch(`${API_BASE_URL}/api/rc/${id}`, {
         method: "DELETE",
@@ -124,6 +134,7 @@ export const apiClient = {
       return handleResponse(response);
     },
   },
+
   verifications: {
     create: async (data: { rcNumber: string; sellerClaim?: any }) => {
       const response = await fetch(`${API_BASE_URL}/api/rc/evaluate`, {

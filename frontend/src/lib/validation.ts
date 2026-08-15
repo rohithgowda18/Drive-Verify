@@ -19,8 +19,10 @@ export const vehicleCreateSchema = z.object({
     color: z.string().optional().or(z.literal("")),
     fuelType: z.string().optional().or(z.literal("")),
     type: z.string().optional().or(z.literal("")),
-    variant: z.string().optional().or(z.literal(""))
+    variant: z.string().optional().or(z.literal("")),
+    imageUrl: z.string().optional().or(z.literal(""))
   }),
+
   insurance: z.object({
     provider: z.string().optional().or(z.literal("")),
     policyNumber: z.string().optional().or(z.literal("")),

@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Shield, PlusCircle, CheckCircle2 } from "lucide-react";
-import { toast } from "sonner";
 import { vehicleCreateSchema } from "@/lib/validation";
+import { VehiclePhotoUpload } from "@/components/VehiclePhotoUpload";
+
 
 const AddVehicle = () => {
   const navigate = useNavigate();
@@ -23,7 +24,8 @@ const AddVehicle = () => {
   const [rcData, setRcData] = useState({
     rcNumber: "",
     owner: { name: "", email: "", phone: "", address: "", aadhaarLast4: "" },
-    vehicleInfo: { make: "", model: "", manufactureYear: "", color: "", fuelType: "PETROL", type: "FOUR_WHEELER", variant: "" },
+    vehicleInfo: { make: "", model: "", manufactureYear: "", color: "", fuelType: "PETROL", type: "FOUR_WHEELER", variant: "", imageUrl: "" },
+
     registrationState: "",
     registrationInfo: { active: true, registrationDate: "", validTill: "" },
     insurance: { provider: "", policyNumber: "", validTill: "" },
@@ -245,7 +247,15 @@ const AddVehicle = () => {
                     />
                   </div>
                 </div>
+
+                <div className="pt-2">
+                  <VehiclePhotoUpload
+                    value={rcData.vehicleInfo.imageUrl}
+                    onChange={(url) => setRcData({ ...rcData, vehicleInfo: { ...rcData.vehicleInfo, imageUrl: url } })}
+                  />
+                </div>
               </div>
+
 
               {/* Insurance & PUC Info */}
               <div className="space-y-3">
