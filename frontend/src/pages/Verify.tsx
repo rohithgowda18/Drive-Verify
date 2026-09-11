@@ -1,18 +1,27 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Shield, ArrowLeft, Search, CheckCircle2, AlertTriangle, FileText, Check, X, Scale, History } from "lucide-react";
+import { Shield, ArrowLeft, Search, CheckCircle2, AlertTriangle, FileText, Check, X, Scale, History, Upload, File, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { apiClient } from "@/lib/api";
+
+interface Finding {
+  field: string;
+  sellerClaim: string;
+  recordedValue: string;
+  result: string;
+  match: boolean;
+}
 
 interface RiskAssessment {
   trustScore: number;
   riskLevel: "LOW" | "MEDIUM" | "HIGH";
+  findings: Finding[];
   mismatches: string[];
   riskReasons: string[];
   positiveFactors: string[];
@@ -26,12 +35,44 @@ interface VerificationData {
   assessment: RiskAssessment;
 }
 
+interface DocMeta {
+  filename: string;
+  documentType: string;
+  fileSize: number;
+  fileSizeFormatted: string;
+  contentType: string;
+  uploadTimestamp: string;
+  status: string;
+}
+
+const ALLOWED_EXTENSIONS = [".pdf", ".jpg", ".jpeg", ".png"];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
 const Verify = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
   const [rcNumber, setRcNumber] = useState("");
   const [claimedOwners, setClaimedOwners] = useState("");
+  const [claimedMileage, setClaimedMileage] = useState("");
+  const [claimedEngineNumber, setClaimedEngineNumber] = useState("");
+  const [claimedInsuranceValid, setClaimedInsuranceValid] = useState(false);
+  const [claimedAccidentFree, setClaimedAccidentFree] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VerificationData | null>(null);
+
+  // Document upload state
+  const [uploadedDocs, setUploadedDocs] = useState<DocMeta[]>([]);
+  const [docUploading, setDocUploading] = useState(false);
+
+  // Pre-fill RC number from URL query param
+  useEffect(() => {
+    const rcParam = searchParams.get("rc");
+    if (rcParam) {
+      setRcNumber(rcParam.toUpperCase());
+    }
+  }, [searchParams]);
 
   const handleEvaluate = async () => {
     if (!rcNumber.trim()) {
@@ -43,29 +84,64 @@ const Verify = () => {
     setResult(null);
 
     try {
-      // 1. Initiate Verification Request with Seller Claims
       const reqPayload = {
         rcNumber: rcNumber.trim().toUpperCase(),
         requestType: "BUYER",
         sellerClaim: {
           claimedOwnerCount: claimedOwners ? parseInt(claimedOwners) : undefined,
+          claimedMileage: claimedMileage ? parseInt(claimedMileage) : undefined,
+          claimedEngineNumber: claimedEngineNumber.trim() || undefined,
+          claimedInsuranceValid: claimedInsuranceValid || undefined,
+          claimedAccidentFree: claimedAccidentFree || undefined,
         },
       };
 
       const assessment = await apiClient.verifications.create(reqPayload);
       const rc = await apiClient.rc.search(rcNumber.trim());
 
-      setResult({
-        rc,
-        assessment,
-      });
-
+      setResult({ rc, assessment });
       toast.success("Risk Assessment generated");
     } catch (error: any) {
       toast.error(error.message || "Failed to process verification");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Client-side validation
+    const lowerName = file.name.toLowerCase();
+    const validExt = ALLOWED_EXTENSIONS.some((ext) => lowerName.endsWith(ext));
+    if (!validExt) {
+      toast.error("Invalid file type. Allowed: PDF, JPG, JPEG, PNG");
+      e.target.value = "";
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("File size exceeds 5 MB limit");
+      e.target.value = "";
+      return;
+    }
+
+    setDocUploading(true);
+    try {
+      const docType = lowerName.endsWith(".pdf") ? "DOCUMENT" : "IMAGE";
+      const meta = await apiClient.documents.validate(file, docType);
+      setUploadedDocs((prev) => [...prev, meta]);
+      toast.success(`${file.name} validated successfully`);
+    } catch (error: any) {
+      toast.error(error.message || "Document validation failed");
+    } finally {
+      setDocUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  const removeDoc = (idx: number) => {
+    setUploadedDocs((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const getScoreBadge = (score: number, level: string) => {
@@ -79,7 +155,6 @@ const Verify = () => {
 
     return (
       <div className="flex items-center gap-4">
-        {/* Radial Score Gauge */}
         <div className="relative w-20 h-20 flex items-center justify-center">
           <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
             <circle cx="40" cy="40" r="36" className="stroke-muted" strokeWidth="6" fill="transparent" />
@@ -100,8 +175,6 @@ const Verify = () => {
             <span className="text-[9px] uppercase font-bold text-muted-foreground">/ 100</span>
           </div>
         </div>
-
-        {/* Text Badge */}
         <div className={`px-4 py-2 rounded-xl border font-bold text-sm flex items-center gap-2 shadow-sm ${bgClass}`}>
           {isLow ? "🟢 LOW RISK" : isMed ? "🟡 REVIEW REQUIRED" : "🔴 HIGH RISK"}
         </div>
@@ -133,6 +206,7 @@ const Verify = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-4xl space-y-6">
+        {/* Seller Claims Form */}
         <Card className="shadow-elevated border-primary/20">
           <CardHeader>
             <CardTitle className="text-2xl font-bold flex items-center gap-2">
@@ -140,10 +214,11 @@ const Verify = () => {
               Evaluate Vehicle Risk & Seller Claims
             </CardTitle>
             <CardDescription>
-              Enter vehicle RC number and optional seller statements to detect mismatches against official records.
+              Enter vehicle RC number and what the seller told you. We'll compare against official records.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-5">
+            {/* Row 1: RC + Owner Count */}
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="rc-number">RC Registration Number *</Label>
@@ -169,12 +244,118 @@ const Verify = () => {
               </div>
             </div>
 
+            {/* Row 2: Mileage + Engine Number */}
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="claimed-mileage">Claimed Odometer (km)</Label>
+                <Input
+                  id="claimed-mileage"
+                  type="number"
+                  placeholder="e.g. 45000"
+                  value={claimedMileage}
+                  onChange={(e) => setClaimedMileage(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="claimed-engine">Claimed Engine Number</Label>
+                <Input
+                  id="claimed-engine"
+                  placeholder="e.g. ENG123456"
+                  value={claimedEngineNumber}
+                  onChange={(e) => setClaimedEngineNumber(e.target.value.toUpperCase())}
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
+            {/* Row 3: Checkboxes */}
+            <div className="flex flex-wrap gap-6">
+              <label className="flex items-center gap-2 cursor-pointer text-sm">
+                <input
+                  type="checkbox"
+                  checked={claimedInsuranceValid}
+                  onChange={(e) => setClaimedInsuranceValid(e.target.checked)}
+                  disabled={loading}
+                  className="rounded border-muted-foreground"
+                />
+                Seller claims insurance is active
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer text-sm">
+                <input
+                  type="checkbox"
+                  checked={claimedAccidentFree}
+                  onChange={(e) => setClaimedAccidentFree(e.target.checked)}
+                  disabled={loading}
+                  className="rounded border-muted-foreground"
+                />
+                Seller claims accident-free
+              </label>
+            </div>
+
             <Button onClick={handleEvaluate} disabled={loading} className="w-full text-base py-5 shadow-md">
               {loading ? "Analyzing Evidence & Claims..." : "Run Trust & Risk Assessment"}
             </Button>
           </CardContent>
         </Card>
 
+        {/* Document Upload Section */}
+        <Card className="shadow-card border">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Upload className="h-5 w-5 text-primary" />
+              Upload Supporting Documents
+            </CardTitle>
+            <CardDescription>
+              Upload RC copy, Insurance, PUC, or Service records for validation. Allowed: PDF, JPG, PNG (max 5 MB).
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3">
+              <label className="flex-1">
+                <input
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={handleDocUpload}
+                  disabled={docUploading}
+                  className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
+                />
+              </label>
+              {docUploading && (
+                <span className="text-xs text-muted-foreground animate-pulse">Validating...</span>
+              )}
+            </div>
+
+            {uploadedDocs.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">Validated Documents</h4>
+                {uploadedDocs.map((doc, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-3 rounded-lg border bg-card text-sm">
+                    <div className="flex items-center gap-3">
+                      <File className="h-4 w-4 text-primary" />
+                      <div>
+                        <p className="font-medium">{doc.filename}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {doc.documentType} • {doc.fileSizeFormatted} • {new Date(doc.uploadTimestamp).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-emerald-600 border-emerald-300 text-xs">
+                        ✓ {doc.status}
+                      </Badge>
+                      <Button variant="ghost" size="sm" onClick={() => removeDoc(idx)}>
+                        <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Results */}
         {result && (
           <div className="space-y-6">
             {/* Risk Assessment Summary Header */}
@@ -214,6 +395,42 @@ const Verify = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Structured Findings Comparison Table */}
+                {result.assessment.findings && result.assessment.findings.length > 0 && (
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider flex items-center gap-1.5">
+                      <FileText className="h-4 w-4" /> Claim vs Evidence Comparison
+                    </h3>
+                    <div className="overflow-x-auto rounded-lg border">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="bg-muted/50 text-left">
+                            <th className="px-4 py-2.5 font-semibold text-xs uppercase tracking-wider">Check</th>
+                            <th className="px-4 py-2.5 font-semibold text-xs uppercase tracking-wider">Seller Claim</th>
+                            <th className="px-4 py-2.5 font-semibold text-xs uppercase tracking-wider">Recorded Evidence</th>
+                            <th className="px-4 py-2.5 font-semibold text-xs uppercase tracking-wider">Result</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y">
+                          {result.assessment.findings.map((f, idx) => (
+                            <tr key={idx} className={f.match ? "bg-emerald-50/30 dark:bg-emerald-950/10" : "bg-rose-50/30 dark:bg-rose-950/10"}>
+                              <td className="px-4 py-3 font-medium">{f.field}</td>
+                              <td className="px-4 py-3 font-mono text-xs">{f.sellerClaim}</td>
+                              <td className="px-4 py-3 font-mono text-xs">{f.recordedValue}</td>
+                              <td className="px-4 py-3">
+                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${f.match ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" : "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300"}`}>
+                                  {f.match ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                                  {f.result}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
 
                 {/* Evidence Mismatches */}
                 {result.assessment.mismatches && result.assessment.mismatches.length > 0 && (
@@ -272,6 +489,27 @@ const Verify = () => {
                         <li key={idx} className="text-foreground">{point}</li>
                       ))}
                     </ul>
+                  </div>
+                )}
+
+                {/* Uploaded Documents Summary */}
+                {uploadedDocs.length > 0 && (
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold uppercase text-muted-foreground tracking-wider flex items-center gap-1.5">
+                      <FileText className="h-4 w-4" /> Attached Supporting Documents ({uploadedDocs.length})
+                    </h3>
+                    <div className="grid md:grid-cols-2 gap-2 text-xs">
+                      {uploadedDocs.map((doc, idx) => (
+                        <div key={idx} className="flex items-center gap-2 p-2.5 rounded border bg-card">
+                          <File className="h-4 w-4 text-primary shrink-0" />
+                          <div className="min-w-0">
+                            <p className="font-medium truncate">{doc.filename}</p>
+                            <p className="text-muted-foreground">{doc.documentType} • {doc.fileSizeFormatted}</p>
+                          </div>
+                          <Badge variant="outline" className="text-emerald-600 border-emerald-300 text-[10px] shrink-0">✓</Badge>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
 

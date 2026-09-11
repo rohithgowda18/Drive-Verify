@@ -117,6 +117,15 @@ const RcDetail = () => {
                   >
                     <History className="h-4 w-4 mr-1" /> History
                   </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                    onClick={() => rc?.rcNumber && navigate(`/verify?rc=${encodeURIComponent(rc.rcNumber)}`)}
+                    disabled={!rc?.rcNumber}
+                  >
+                    <Shield className="h-4 w-4 mr-1" /> Verify Before Purchase
+                  </Button>
                 </div>
               </CardContent>
             </Card>

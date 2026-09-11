@@ -52,6 +52,7 @@ public class Rc {
         private String color;
         private int manufactureYear;
         private String imageUrl;
+        private Integer mileage; // odometer reading in km
     }
 
 

@@ -169,4 +169,25 @@ export const apiClient = {
       return handleResponse(response);
     },
   },
+
+  documents: {
+    validate: async (file: File, documentType: string) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("documentType", documentType);
+
+      const token = auth.getToken();
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/rc/documents/validate`, {
+        method: "POST",
+        headers,
+        body: formData,
+      });
+      return handleResponse(response);
+    },
+  },
 };

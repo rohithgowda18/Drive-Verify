@@ -10,6 +10,8 @@ public class EvaluateVehicleRequest {
     @Data
     public static class SellerClaim {
         private Integer claimedOwnerCount;
+        private Integer claimedMileage;
+        private String claimedEngineNumber;
         private Boolean claimedAccidentFree;
         private Boolean claimedOriginalEngine;
         private Boolean claimedOriginalChassis;

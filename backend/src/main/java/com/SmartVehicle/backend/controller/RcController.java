@@ -94,6 +94,8 @@ public class RcController {
         if (requestPayload.getSellerClaim() != null) {
             sellerClaim = new SellerClaim();
             sellerClaim.setClaimedOwnerCount(requestPayload.getSellerClaim().getClaimedOwnerCount());
+            sellerClaim.setClaimedMileage(requestPayload.getSellerClaim().getClaimedMileage());
+            sellerClaim.setClaimedEngineNumber(requestPayload.getSellerClaim().getClaimedEngineNumber());
             sellerClaim.setClaimedAccidentFree(requestPayload.getSellerClaim().getClaimedAccidentFree());
             sellerClaim.setClaimedOriginalEngine(requestPayload.getSellerClaim().getClaimedOriginalEngine());
             sellerClaim.setClaimedOriginalChassis(requestPayload.getSellerClaim().getClaimedOriginalChassis());
@@ -105,6 +107,60 @@ public class RcController {
         int actualOwnersCount = 1 + transfersCount;
 
         return riskAssessmentService.evaluate(existingRc, sellerClaim, actualOwnersCount);
+    }
+
+    // --- Simple Document Validation Endpoint ---
+    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+    private static final List<String> ALLOWED_TYPES = List.of(
+            "application/pdf", "image/jpeg", "image/jpg", "image/png"
+    );
+    private static final List<String> ALLOWED_EXTENSIONS = List.of(
+            ".pdf", ".jpg", ".jpeg", ".png"
+    );
+
+    @PostMapping("/documents/validate")
+    public Map<String, Object> validateDocument(
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+            @RequestParam(value = "documentType", defaultValue = "OTHER") String documentType) {
+
+        // Validate file presence
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty");
+        }
+
+        // Validate file size
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new IllegalArgumentException("File size exceeds maximum allowed size of 5 MB");
+        }
+
+        // Validate file type by extension
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || originalFilename.isBlank()) {
+            throw new IllegalArgumentException("Filename is required");
+        }
+        String lowerName = originalFilename.toLowerCase();
+        boolean validExtension = ALLOWED_EXTENSIONS.stream().anyMatch(lowerName::endsWith);
+        if (!validExtension) {
+            throw new IllegalArgumentException("Invalid file type. Allowed: PDF, JPG, JPEG, PNG");
+        }
+
+        // Validate content type
+        String contentType = file.getContentType();
+        if (contentType != null && !ALLOWED_TYPES.contains(contentType.toLowerCase())) {
+            throw new IllegalArgumentException("Invalid content type: " + contentType);
+        }
+
+        // Return document metadata (no persistence — simple validation + metadata response)
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("filename", originalFilename);
+        metadata.put("documentType", documentType.toUpperCase());
+        metadata.put("fileSize", file.getSize());
+        metadata.put("fileSizeFormatted", String.format("%.1f KB", file.getSize() / 1024.0));
+        metadata.put("contentType", contentType);
+        metadata.put("uploadTimestamp", java.time.Instant.now().toString());
+        metadata.put("status", "VALIDATED");
+
+        return metadata;
     }
 
     @GetMapping("/stats")
